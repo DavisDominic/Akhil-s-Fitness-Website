@@ -191,7 +191,10 @@
    (iteration-count:1, near-zero duration) rather than a separate rule here. */
 .tcarousel{overflow:hidden;margin:0 calc(var(--gutter) * -1);padding:4px 0;-webkit-mask-image:linear-gradient(to right,transparent,#000 var(--gutter),#000 calc(100% - var(--gutter)),transparent);mask-image:linear-gradient(to right,transparent,#000 var(--gutter),#000 calc(100% - var(--gutter)),transparent)}
 .tcarousel-track{display:flex;align-items:stretch;gap:16px;width:max-content;animation:marquee 42s linear infinite}
-.tcarousel:hover .tcarousel-track,.tcarousel:focus-within .tcarousel-track,.tcarousel.is-paused .tcarousel-track{animation-play-state:paused}
+/* hover: hover) excludes touch: without it, a tap leaves a "sticky" :hover on touch browsers (there's no pointer
+   to move away and clear it), which never releases and permanently fights the JS resume timer below. */
+@media(hover:hover){.tcarousel:hover .tcarousel-track{animation-play-state:paused}}
+.tcarousel:focus-within .tcarousel-track,.tcarousel.is-paused .tcarousel-track{animation-play-state:paused}
 @keyframes marquee{from{transform:translateX(0)}to{transform:translateX(-50%)}}
 /* align-items:stretch (inherited from the flex row) is what makes every card match the tallest one — it only
    works because .tcard itself has no explicit height; a shorter quote's card gets stretched to fill that height,
