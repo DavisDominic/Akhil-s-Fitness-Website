@@ -4,12 +4,16 @@
   "compatibility_date": "2026-09-01",
   "compatibility_flags": ["nodejs_compat"],
   "main": "./src/worker.ts",
-  // D1: leads + testimonials. database_id is filled in when the real database is created
-  // (wrangler auto-provisions it on first deploy). Local dev uses an on-disk simulator.
+  // D1: leads + testimonials. Local dev uses an on-disk simulator regardless of database_id.
   "d1_databases": [
-    { "binding": "DB", "database_name": "akhil-fitness", "migrations_dir": "migrations" }
+    { "binding": "DB", "database_name": "akhil-fitness", "database_id": "8668da32-3964-4773-8441-904c148c6b06", "migrations_dir": "migrations" }
   ],
   // Retry failed notifications and nudge un-contacted leads (free Cron Triggers).
   "triggers": { "crons": ["*/10 * * * *"] },
-  "observability": { "enabled": true }
+  "observability": { "enabled": true },
+  // Custom Domain: same Cloudflare account as the Registrar purchase, so no nameserver change needed —
+  // Cloudflare provisions the TLS cert and routes the zone straight to this Worker.
+  "routes": [
+    { "pattern": "akhilfitness.com", "custom_domain": true }
+  ]
 }
