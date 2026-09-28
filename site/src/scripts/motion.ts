@@ -69,36 +69,15 @@ document.querySelectorAll<HTMLElement>('[data-marquee]').forEach((el) => {
 // of whichever one is "current" — shared by both mechanisms below.
 function loopWidthOf(track: HTMLElement) { return track.scrollWidth / 3; }
 
-// --- iOS: genuine native scrolling (see .tcarousel--ios in layout.css). No autoplay (per explicit request), so
-// there's nothing to fight momentum with — native touch/scroll handling is simply more reliable than any
-// hand-rolled equivalent, and repeated attempts to patch a custom touch/transform implementation for iOS
-// specifically kept surfacing new problems (dead space at the loop seam, non-smooth dragging) rather than
-// fewer. JS here only ever touches scrollLeft once scrolling has fully settled (never mid-gesture, never
-// fighting momentum): if that's landed in the first or third copy, it silently jumps by exactly one loop-width
-// into the equivalent spot in the middle copy — invisible, since all three copies are pixel-identical. ---
+// --- iOS: genuine native scrolling (see .tcarousel--ios in layout.css), and — per explicit request, after a
+// seamless loop kept hitting new real-device-only problems each attempt (dead space at the seam even with a
+// tripled-content buffer, invisible-content and other compositing quirks) — a FINITE carousel here, not an
+// infinite one. The duplicated copies (used for the loop on other platforms, see setupTransformDriven) are
+// simply hidden, leaving plain bounded native scrolling with the first and last real card as endpoints; no
+// custom repositioning logic left to get wrong. ---
 function setupNativeScroll(el: HTMLElement, track: HTMLElement) {
   el.classList.add('tcarousel--ios');
-  let idleTimer: ReturnType<typeof setTimeout> | undefined;
-
-  function recentre() {
-    const lw = loopWidthOf(track);
-    if (lw <= 0) return;
-    // A loop, not a single if/else: realistically only ever runs once (a single settled scroll can't drift more
-    // than about a screen's width, well under one lw), but a loop costs nothing and stays correct regardless.
-    while (el.scrollLeft < lw * 0.5) el.scrollLeft += lw;
-    while (el.scrollLeft > lw * 1.5) el.scrollLeft -= lw;
-  }
-
-  // Deliberately does NOT set el.scrollLeft on load to pre-position into the middle copy — that depended on
-  // track.scrollWidth already being accurate at that moment, one more thing to go wrong for no real benefit.
-  // Starting at the natural 0 (first copy, i.e. the real, non-duplicated cards) is always correct immediately;
-  // it just means there's no backward buffer until the visitor has scrolled forward at least once, which is a
-  // minor trade next to one more unverified assumption about real-device timing.
-
-  el.addEventListener('scroll', () => {
-    clearTimeout(idleTimer);
-    idleTimer = setTimeout(recentre, 150);
-  }, { passive: true });
+  track.querySelectorAll<HTMLElement>('.tcard[aria-hidden="true"]').forEach((c) => { c.style.display = 'none'; });
 }
 
 // --- Non-iOS (desktop, Android): auto-advances via a plain CSS transform on .tcarousel-track, driven entirely
