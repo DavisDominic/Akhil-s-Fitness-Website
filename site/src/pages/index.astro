@@ -188,7 +188,7 @@ const faq = [
   <section class="section" aria-labelledby="proof-h">
     <div class="container">
       <div class="sec-head reveal"><h2 class="t-h2" id="proof-h">Real people. <span>Real progress.</span></h2></div>
-      <div class="tcarousel" data-marquee>
+      <div class="tcarousel" data-marquee tabindex="0" role="region" aria-label="Client testimonials, auto-scrolling">
         <div class="tcarousel-track">
           {sampleTestimonials.map((t) => <TestimonialCard t={t} />)}
           <div aria-hidden="true" style="display:contents">

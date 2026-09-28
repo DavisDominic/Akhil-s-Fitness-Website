@@ -182,20 +182,17 @@
 .metrics .metric b{display:block;font:800 40px/1 var(--font-display);color:var(--accent-500)}
 .metrics .metric span{display:block;margin-top:4px;font:500 16px/1.4 var(--font-body);color:var(--text-secondary)}
 @media(min-width:700px){.metrics .metric b{font-size:clamp(40px,6vw,48px)}}
-/* Continuously drifting marquee, not a swipeable carousel: the card list is rendered twice back to back (the
-   second copy is aria-hidden, purely visual) and the whole track animates from translateX(0) to translateX(-50%)
-   — exactly one full copy's width — on an infinite loop, so it wraps with no visible seam or reset-snap. Paused
-   on hover/focus (mouse/keyboard) via CSS alone, and on touch via src/scripts/motion.ts (touch devices have no
-   hover state, so a finger tap pauses it for a few seconds instead). The container clips + edge-fades the track;
-   it no longer scrolls itself. prefers-reduced-motion freezes it via the global animation override in base.css
-   (iteration-count:1, near-zero duration) rather than a separate rule here. */
-.tcarousel{overflow:hidden;margin:0 calc(var(--gutter) * -1);padding:4px 0;-webkit-mask-image:linear-gradient(to right,transparent,#000 var(--gutter),#000 calc(100% - var(--gutter)),transparent);mask-image:linear-gradient(to right,transparent,#000 var(--gutter),#000 calc(100% - var(--gutter)),transparent)}
-.tcarousel-track{display:flex;align-items:stretch;gap:16px;width:max-content;animation:marquee 42s linear infinite}
-/* hover: hover) excludes touch: without it, a tap leaves a "sticky" :hover on touch browsers (there's no pointer
-   to move away and clear it), which never releases and permanently fights the JS resume timer below. */
-@media(hover:hover){.tcarousel:hover .tcarousel-track{animation-play-state:paused}}
-.tcarousel:focus-within .tcarousel-track,.tcarousel.is-paused .tcarousel-track{animation-play-state:paused}
-@keyframes marquee{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+/* Auto-advancing AND swipeable: a genuine horizontally-scrollable container (native touch drag, trackpad,
+   mouse-wheel all work for free), auto-scrolled by JS (src/scripts/motion.ts) incrementing scrollLeft every
+   frame rather than a CSS transform loop — a real scroll container is what makes it draggable, and JS control
+   is what lets a touch/drag pause it and resume immediately on release with no fight against a competing CSS
+   animation. The card list is rendered twice back to back (the second copy is aria-hidden, purely visual) so
+   the JS can wrap scrollLeft past track.scrollWidth/2 with no visible seam. Scrollbar hidden since the edge-fade
+   mask (below) already signals "more content" without one. prefers-reduced-motion is checked directly in the JS
+   (it drives scrollLeft, not a CSS animation, so the global reduced-motion override in base.css can't reach it). */
+.tcarousel{overflow-x:auto;overflow-y:hidden;overscroll-behavior-x:contain;-webkit-overflow-scrolling:touch;scrollbar-width:none;margin:0 calc(var(--gutter) * -1);padding:4px 0;-webkit-mask-image:linear-gradient(to right,transparent,#000 var(--gutter),#000 calc(100% - var(--gutter)),transparent);mask-image:linear-gradient(to right,transparent,#000 var(--gutter),#000 calc(100% - var(--gutter)),transparent)}
+.tcarousel::-webkit-scrollbar{display:none}
+.tcarousel-track{display:flex;align-items:stretch;gap:16px;width:max-content}
 /* align-items:stretch (inherited from the flex row) is what makes every card match the tallest one — it only
    works because .tcard itself has no explicit height; a shorter quote's card gets stretched to fill that height,
    and its footer's margin-top:auto absorbs the extra space above the avatar row. */
