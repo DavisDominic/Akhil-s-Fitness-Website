@@ -107,12 +107,19 @@ document.querySelectorAll<HTMLElement>('[data-marquee]').forEach((el) => {
   }
   function dragMove(clientX: number) {
     if (!dragging) return;
-    const half = halfWidth();
-    if (half <= 0) return;
-    pos = wrap(dragStartPos - (clientX - dragStartX), half);
+    // Deliberately NOT wrapped here — only tick()'s own autoplay step and dragEnd() below wrap. A real finger
+    // isn't perfectly monotonic; if the raw value happens to hover right at the wrap boundary, wrapping on
+    // every touchmove could flip the result between two very different-looking positions frame to frame from
+    // ordinary sub-pixel jitter, which read as the carousel "wriggling". A CSS transform has no problem with a
+    // value outside [0, half) for the short, bounded span of a single drag gesture.
+    pos = dragStartPos - (clientX - dragStartX);
     render();
   }
-  function dragEnd() { dragging = false; }
+  function dragEnd() {
+    dragging = false;
+    const half = halfWidth();
+    if (half > 0) pos = wrap(pos, half); // bring it back in range now that nothing is actively rendering it
+  }
 
   // touch-action:pan-y (layout.css) is what's SUPPOSED to leave vertical page-scroll to the browser while this
   // handles horizontal drags — but touch-action support is inconsistent on older iOS Safari, and a horizontal
@@ -122,12 +129,15 @@ document.querySelectorAll<HTMLElement>('[data-marquee]').forEach((el) => {
   // defense — never for a vertical one, which must stay free to scroll the page normally.
   let touchStartY = 0;
   let axis: 'x' | 'y' | null = null;
+  let lastTouchAt = 0;
   el.addEventListener('touchstart', (e) => {
+    lastTouchAt = Date.now();
     dragStart(e.touches[0].clientX);
     touchStartY = e.touches[0].clientY;
     axis = null;
   }, { passive: true });
   el.addEventListener('touchmove', (e) => {
+    lastTouchAt = Date.now();
     const t = e.touches[0];
     if (axis === null) {
       const dx = t.clientX - dragStartX, dy = t.clientY - touchStartY;
@@ -138,14 +148,15 @@ document.querySelectorAll<HTMLElement>('[data-marquee]').forEach((el) => {
     if (axis === 'x') e.preventDefault();
     dragMove(t.clientX);
   }, { passive: false });
-  el.addEventListener('touchend', dragEnd, { passive: true });
-  el.addEventListener('touchcancel', dragEnd, { passive: true });
+  el.addEventListener('touchend', () => { lastTouchAt = Date.now(); dragEnd(); }, { passive: true });
+  el.addEventListener('touchcancel', () => { lastTouchAt = Date.now(); dragEnd(); }, { passive: true });
 
-  // Mouse drag, for parity with the trackpad/wheel scroll a native scroll container used to give desktop for free.
-  // The window-level mousemove is guarded on the left button still actually being held (buttons bit 1) — a
-  // dangling `dragging=true` with no matching mouseup (dropped outside the window, a devtools/automation tool
-  // synthesizing its own pointer tracking, etc.) would otherwise silently drag the carousel around forever.
-  el.addEventListener('mousedown', (e) => { dragStart(e.clientX); e.preventDefault(); });
+  // Mouse drag, for parity with the trackpad/wheel scroll a native scroll container used to give desktop for
+  // free. iOS Safari synthesizes compatibility mousedown/mousemove/mouseup events roughly 300ms after a REAL
+  // tap (a long-standing WebKit behaviour, unrelated to any hover check) — without lastTouchAt, that synthetic
+  // mousedown set dragging=true with no real mouseup ever coming to clear it, permanently blocking autoplay
+  // from ever resuming on a touch device. Ignore any mouse event arriving within a second of real touch input.
+  el.addEventListener('mousedown', (e) => { if (Date.now() - lastTouchAt < 1000) return; dragStart(e.clientX); e.preventDefault(); });
   window.addEventListener('mousemove', (e) => { if (e.buttons & 1) dragMove(e.clientX); else dragEnd(); });
   window.addEventListener('mouseup', dragEnd);
 
