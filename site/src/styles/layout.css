@@ -1,0 +1,350 @@
+/* Site shell + section patterns (adapted from Design System V5.1 §07–08). */
+
+/* wordmark: the real logo mark (public/images/logo.png), cropped tight to its own content with the source's
+   black background keyed out to transparency — sized by image height, not font-size, since it's a raster mark. */
+.wordmark{display:inline-flex;align-items:center;text-decoration:none}
+.wordmark img{height:30px;width:auto;display:block}
+.site-header .wordmark,.menu-dialog .wordmark,.footer .wordmark{min-height:var(--tap)}
+/* The top-nav mark (icon only) matches the footer wordmark's own height exactly, instead of the taller default
+   above — the two were reading as different sizes even though nothing else about their scale should differ. */
+.site-header .wordmark img{height:24px}
+@media(min-width:1024px){.site-header .wordmark img{height:28px}}
+
+/* helpers */
+/* Literal grid: 4 columns mobile, 8 tablet, 12 desktop. Use with .span-* on children (mobile-first; each span
+   also applies at every wider tier unless overridden by a tablet/desktop variant). */
+.split{display:grid;grid-template-columns:repeat(4,1fr);gap:var(--sp-6)}
+.split>*{min-width:0}
+@media(min-width:700px){.split{grid-template-columns:repeat(8,1fr);gap:var(--sp-7)}}
+@media(min-width:1024px){.split{grid-template-columns:repeat(12,1fr);gap:var(--sp-9);align-items:center}.split.top{align-items:start}}
+.span-4{grid-column:span 4}
+@media(min-width:700px){.span-8-md{grid-column:span 8}}
+@media(min-width:1024px){.span-7-lg{grid-column:span 7}.span-5-lg{grid-column:span 5}.span-8-lg{grid-column:span 8}.span-4-lg{grid-column:span 4}}
+
+.two{display:grid;gap:32px}
+.two>*{min-width:0}
+@media(min-width:1024px){.two{grid-template-columns:1fr 1fr;align-items:start;gap:56px}}
+.mtop-1{margin-top:var(--sp-2)}.mtop-2{margin-top:var(--sp-4)}.mtop-3{margin-top:var(--sp-6)}.mtop-4{margin-top:var(--sp-8)}
+
+/* header */
+.site-header{position:sticky;top:0;z-index:var(--z-nav);background:rgba(8,8,9,.92);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);border-bottom:1px solid var(--border-subtle)}
+.site-header .in{height:var(--header-h);display:flex;align-items:center;justify-content:space-between;gap:16px}
+.desk-nav{display:none}
+.nav-link{min-height:var(--tap);padding:0 14px;display:flex;align-items:center;font:700 13px/1 var(--font-body);letter-spacing:.08em;text-transform:uppercase;text-decoration:none;color:var(--ink-200)}
+.nav-link:hover{color:var(--white)}
+.nav-link[aria-current=page]{color:var(--accent-500)}
+@media(min-width:1024px){
+  .desk-nav{display:flex;align-items:center;gap:4px}
+  .desk-nav .btn{margin-left:12px}
+  .menu-open{display:none!important}
+}
+
+/* full-screen menu (native <dialog>: focus trap, Esc and inert background come for free) */
+.menu-dialog{border:0;padding:0;width:100%;max-width:none;height:100%;max-height:none;background:var(--bg-page);color:var(--text-primary);overflow:auto}
+.menu-dialog[open]{display:flex;flex-direction:column}
+.menu-dialog::backdrop{background:var(--ink-950)}
+.menu-dialog .mhead{height:var(--header-h);padding:0 var(--gutter);display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border-subtle);flex:none}
+.menu-dialog .mbody{padding:24px var(--gutter) 40px;display:grid;gap:20px;align-content:start}
+.menu{display:grid;gap:0;margin-top:8px}
+.menu a{display:flex;justify-content:space-between;align-items:center;min-height:64px;border-bottom:1px solid var(--border-subtle);font:800 32px/1 var(--font-display);text-transform:uppercase;text-decoration:none}
+.menu a[aria-current=page]{color:var(--accent-500)}
+@media(min-width:1024px){.menu-dialog{display:none!important}}
+
+/* Floating round CTAs in the thumb zone (bottom-right), not a full-width bar — a FAB is meant to float over
+   content rather than reserve a page-wide strip, so there's no body padding-bottom reservation here. */
+.fabs{position:fixed;right:calc(var(--gutter) + env(safe-area-inset-right));bottom:calc(20px + env(safe-area-inset-bottom));z-index:var(--z-sticky);display:flex;flex-direction:column;align-items:center;gap:12px;transition:transform var(--dur-base) var(--ease),visibility var(--dur-base)}
+.fabs.is-hidden{transform:translateY(calc(100% + 20px));visibility:hidden}
+.fab{--s:60px;width:var(--s);height:var(--s);border-radius:50%;display:grid;place-items:center;flex:none;box-shadow:var(--shadow-2);transition:transform var(--dur-fast) var(--ease)}
+.fab:active{transform:scale(.94)}
+.fab .icon{width:26px;height:26px}
+.fab-primary{--s:64px;background:var(--accent-500);color:var(--ink-950)}
+.fab-secondary{--s:52px;background:var(--ink-850);color:var(--paper);border:1.5px solid var(--border-control)}
+@media(min-width:1024px){.fabs{display:none}}
+
+/* sections */
+.section{padding:var(--sp-10) 0;border-top:1px solid var(--border-subtle);scroll-margin-top:var(--header-h)}
+@media(min-width:700px){.section{padding:var(--sp-11) 0}}
+@media(min-width:1024px){.section{padding:var(--sp-12) 0}}
+.section.flush{border-top:0}
+.sec-head{display:grid;gap:var(--sp-4);margin-bottom:var(--sp-8)}
+.sec-head .t-lead{max-width:56ch}
+.narrow{max-width:62ch}
+.wide{max-width:80ch}
+
+/* hero: 4-col mobile (text, then photo) · 8-col tablet (same, wider measure) · 12-col desktop (7 text / 5 photo, side by side) */
+/* Glow sits behind the copy (top-left), not behind the photo column — a colour-graded patch of background right
+   next to a flat black photo is exactly what reads as a "card" edge, however soft the photo's own fade is. */
+/* No top padding below 1024px: the immersive photo sits flush under the header, not below a gap that showed the
+   section's own background as a stray strip above it. Desktop (≥1024px) restores its own top padding below. */
+/* Flat below 1024px: the decorative glow is desktop-only (see the 1024px block) — the mobile immersive photo now
+   sits inset with a gap around it (not full-bleed), and a tinted patch of background behind that gap is exactly
+   what turns a rounded photo frame into a visible "card" edge again. */
+.hero{position:relative;overflow:hidden;padding:0 0 var(--sp-10);background:var(--ink-950)}
+.hero>.container{position:relative;z-index:1}
+/* The 46ch cap lives on the lead paragraph only (a sane reading measure for body text) — not on the column as
+   a whole, which used to also squeeze the heading down to ~450px regardless of how wide its actual 7-column
+   grid track was, forcing it to wrap far short of the space it really had. */
+.hero-title{font-size:clamp(60px,16vw,96px);margin-top:16px}
+.hero .t-lead{margin-top:20px;max-width:46ch}
+.hero-cta{display:none;margin-top:var(--sp-6)} /* was 0 — buttons sat flush against the paragraph above them */
+.hero-media{margin-top:var(--sp-7)}
+@media(min-width:700px){.hero-cta{display:flex}} /* .row already gives flex-wrap + gap + natural button widths */
+@media(min-width:1024px){
+  /* The whole hero — copy and both CTAs — must be visible without scrolling on a normal desktop window, not
+     just the photo. min-height (not height) sizes the section to the viewport but still lets it grow on a
+     short/zoomed window rather than clipping; the smaller padding and title cap below are what keep the
+     *content* short enough to actually fit that height on ordinary 800–1000px-tall screens. */
+  .hero{min-height:calc(100dvh - var(--header-h));display:flex;align-items:center;padding:var(--sp-8) 0;background:radial-gradient(circle at 10% 0%,rgba(255,224,24,.10),transparent 35%),var(--ink-950)}
+  .hero>.container{width:100%}
+  /* Exactly 2 lines — one sentence each (index.astro breaks them with a <br>) — not 4. The old 11ch cap forced
+     a wrap partway through the first sentence; sized instead so the longer second sentence ("Learn how to stay
+     fit.") fits the (now 8-column, widened from 7) text measure at any desktop viewport width without wrapping. */
+  .hero-title{font-size:clamp(48px,4.4vw,72px);max-width:none}
+  .hero-media{margin-top:0}
+  /* The photo no longer floats at its own tall aspect ratio — it stretches to match the text column's actual
+     height, so the two sit level, like matched panels, instead of one being taller and vertically centered. */
+  .hero .split{align-items:stretch}
+  .hero-media .portrait{aspect-ratio:auto;height:100%}
+}
+
+/* Philosophy fills roughly a full mobile screen (not a condensed block): the section gets a min-height and its
+   container becomes a flex column with justify-content:space-between, so the gap above the stat row absorbs
+   whatever space is actually available on a given device instead of being a fixed margin tuned for one screen. */
+/* padding-bottom:0 — the section's own bottom padding would otherwise show as a strip of plain page background
+   below the accent panel, which is the last thing in the section on mobile; .phil-stats supplies its own bottom
+   padding instead, so the yellow itself (not the black page bg) reaches the true bottom of the section/screen. */
+@media(max-width:1023.98px){.phil-section{min-height:100dvh;display:flex;flex-direction:column;justify-content:space-between;padding-bottom:0}}
+.phil-inner{width:100%}
+.phil-inner .t-lead{font-size:24px}
+/* Matches the testimonial card's own copy size (.tcard blockquote is 18px) rather than an independently-tuned
+   number, so the two "body copy at reading size" spots on the page read as the same type scale. */
+.phil-inner .t-lead.phil-lead{font-size:18px}
+/* Mobile: the stat row sits on its own full-bleed accent panel (not the page background) — matches the mockup's
+   two-tone screen (dark copy half, solid-yellow stat half) instead of plain columns floating on the same black. */
+.phil-stats{background:var(--accent-grad);color:var(--ink-950)}
+/* Top/bottom padding sized against the mockup's own panel (70px above the heading, 85px below the last stat row,
+   against its 402px-wide reference frame) rather than the smaller, tighter values this panel launched with. */
+.phil-stats .container{padding:var(--sp-10) 0 var(--sp-11)}
+.phil-stats-label{font:800 40px/1.1 var(--font-display);letter-spacing:.02em;text-transform:uppercase;text-decoration:underline;text-underline-offset:8px;text-decoration-thickness:2px}
+/* flex, not a 3-column grid — an equal-1fr grid gives each column the same *track* width, but the gap you
+   actually see is the leftover space after each column's own (shorter or longer) text, so "2,400+ hours
+   training" left almost no visible gap while "100+ clients coached" left a big one. Flex sizes each stat to its
+   own content; justify-content:space-between then spends the row's full width as equal gaps between the three
+   (not one lump of unused space after the last one) — gap stays as a floor so wrapped rows keep real spacing. */
+.phil-stats-row{display:flex;flex-wrap:wrap;justify-content:space-between;gap:var(--sp-6);margin-top:var(--sp-6)}
+.phil-stats-row b{display:block;font:800 40px/1 var(--font-display);color:var(--ink-950)}
+/* white-space:pre-line respects the "\n" in each label (site.ts) as a forced break — without it, a label like
+   "clients coached" rendered on one line whenever there was room, which made that stat's own box as wide as the
+   whole phrase instead of just its number/widest word, throwing off both the row's fit and its spacing. */
+.phil-stats-row span{display:block;margin-top:4px;font:500 16px/1.4 var(--font-body);color:#3A2B00;white-space:pre-line}
+@media(min-width:700px){
+  .phil-stats-label{font-size:44px}
+  .phil-stats-row b{font-size:clamp(40px,6vw,48px)}
+}
+/* ≥1024px: keeps the same full-bleed yellow panel as mobile (just needs its own top margin, since .phil-section
+   is no longer the flex/space-between layout that supplies that gap automatically below 1024px) — a plain dark
+   row of accent-coloured numbers read as flat/unfinished next to the rest of the page's bolder surfaces. */
+@media(min-width:1024px){
+  .phil-stats{margin-top:var(--sp-9)}
+}
+
+/* cards / grids used by sections */
+.card .kick{margin-bottom:2px}
+.card h3{font:700 24px/1.2 var(--font-display)}
+/* Matches the training-card bullet copy size (.train-body li, Home) — scoped to just this list (not a blanket
+   .step p change) so Connect's own steps keep their existing 14px size. */
+.why-steps .step p{font-size:16px}
+/* Three verified figures — same number/label format as the Home "Why train with Akhil" stats (flex row, fixed
+   gap, no per-item card chrome) rather than the old bordered-card grid, so the same figures read as one
+   consistent type scale wherever they appear on the site. */
+.metrics{display:flex;flex-wrap:wrap;gap:var(--sp-8)}
+.metrics .metric{padding:0;background:none;border:0;border-radius:0}
+.metrics .metric b{display:block;font:800 40px/1 var(--font-display);color:var(--accent-500)}
+.metrics .metric span{display:block;margin-top:4px;font:500 16px/1.4 var(--font-body);color:var(--text-secondary)}
+@media(min-width:700px){.metrics .metric b{font-size:clamp(40px,6vw,48px)}}
+/* Horizontal, swipeable carousel (not a wrapping grid): snap-scrolled one-card-at-a-time on mobile, with the next
+   card peeking in at the edge; wider tiers show more of that peek as the card's own flex-basis shrinks. Native
+   scroll-snap needs no JS for swipe/keyboard/trackpad scrolling. Scrollbar hidden (still fully operable via touch/
+   trackpad/arrow-key scroll) since a visible horizontal scrollbar under a card row reads as a stray UI element,
+   not a control anyone here is expected to drag. */
+/* align-items:stretch (the flex default, made explicit here) is what makes every card match the tallest one in
+   the row — it only works because .tcard itself has no explicit height; a shorter quote's card gets stretched
+   to fill that height, and its footer's margin-top:auto absorbs the extra space above the avatar row. */
+.tcarousel{display:flex;align-items:stretch;gap:16px;overflow-x:auto;scroll-snap-type:x mandatory;scroll-padding-left:var(--gutter);margin:0 calc(var(--gutter) * -1);padding:4px var(--gutter);scrollbar-width:none}
+.tcarousel::-webkit-scrollbar{display:none}
+.tcarousel>*{flex:0 0 85%;scroll-snap-align:start;min-width:0}
+@media(min-width:700px){.tcarousel>*{flex:0 0 60%}}
+@media(min-width:1024px){.tcarousel{gap:24px}.tcarousel>*{flex:0 0 400px}}
+.tcard .sample{align-self:flex-start}
+/* Training modality cards: one column always — these are accordions, not a grid of equal-height tiles, so
+   wrapping them into columns would leave neighbouring cards jumping around as siblings open/close. */
+.train-list{display:grid;gap:16px}
+/* The mockup's soft amber glow lives on a WRAPPER, not on .train-card itself — .train-card needs
+   overflow:hidden to clip the corner stripe to its rounded corners, and overflow:hidden also clips any
+   box-shadow painted on that same element (a shadow is drawn outside the border box, which "hidden" cuts off
+   right along with everything else). The wrapper has no overflow/background of its own, just the shadow. */
+.train-card-wrap{border-radius:var(--r-lg);box-shadow:0 0 0 1px rgba(255,224,24,.2),0 0 28px rgba(255,224,24,.16)}
+/* Flat card (not the shared .card gradient) with a hazard-stripe corner motif in the top-right, same technique
+   as the old value cards: border:0 on the card itself (a border would shift the stripe's flush top:0;right:0
+   1px inside the true edge — the containing block for an absolutely positioned child is the padding box, not
+   the border box) and no padding on the card (the stripe's positioned ancestor must be unpadded so flush
+   offsets need no math and there's nothing for overflow-clip + a rounded corner to get wrong). */
+.train-card{position:relative;overflow:hidden;background:var(--ink-900);border:0;padding:0}
+/* SVG asset (not a CSS repeating-gradient): the gradient's band pitch didn't divide evenly into the box width,
+   so the last band at the right edge came out thinner than the rest — a visibly "cut" stripe. The SVG's bands
+   are pre-cut to its own viewBox, so every band in the box is a full, identical parallelogram. */
+.train-stripes{position:absolute;top:0;right:0;width:150px;height:46px;object-fit:cover;pointer-events:none}
+/* The number/title/chevron row AND the divider both live inside <summary> — that's the only part of a closed
+   <details> that stays rendered, and the mockup shows the divider under every card whether it's open or not. */
+.train-summary{position:relative;z-index:1;list-style:none;cursor:pointer;padding:24px;display:flex;flex-direction:column;gap:20px}
+.train-summary::-webkit-details-marker{display:none}
+/* margin-top clears the stripe above it — without it the row sits flush under the stripe's own top:0, so a
+   2-line title runs straight through the diagonal bands instead of starting below them. */
+.train-row{display:flex;align-items:center;gap:16px;margin-top:36px}
+.train-no{font:800 44px/1 var(--font-display);color:var(--paper);flex:none}
+/* Manrope (the site's own loaded body font), not a system monospace stack — ui-monospace/SFMono/Menlo are
+   Apple-only and Consolas is Windows-only, so Android fell all the way through to whatever generic "monospace"
+   font that device ships, which looked like a mismatched, wrong font next to the rest of the page. Letter-
+   spacing + uppercase still gives it a distinct "label" feel without depending on a font that isn't loaded. */
+.train-row h3{flex:1;min-width:0;font:700 17px/1.4 var(--font-body);letter-spacing:.05em;text-transform:uppercase}
+.train-chev{flex:none;color:var(--paper);transition:transform var(--dur-base) var(--ease)}
+.train-card[open] .train-chev{transform:rotate(180deg)}
+.train-card[open] .train-no,.train-card[open] .train-row h3{color:var(--accent-500)}
+.train-rule{display:block;border-top:1px solid var(--border-subtle)}
+.train-body{position:relative;z-index:1;padding:0 24px 24px;display:grid;gap:14px}
+.train-body li{position:relative;padding-left:20px;color:var(--text-secondary);font:500 16px/1.55 var(--font-body)}
+.train-body li::before{content:"";position:absolute;left:0;top:.55em;width:7px;height:7px;border-radius:50%;background:var(--accent-500)}
+
+/* imagery placeholder frame (DS §09). Replace with real photography before launch. */
+.frame{position:relative;background:linear-gradient(160deg,var(--ink-700),var(--ink-850));border:1px solid var(--border-strong);border-radius:var(--r-md);display:grid;place-items:center;color:var(--ink-400);font:700 12px var(--font-body);letter-spacing:.08em;text-transform:uppercase;overflow:hidden}
+.frame::after{content:"";position:absolute;inset:0;background:linear-gradient(0deg,rgba(8,8,9,.5),transparent 45%);pointer-events:none}
+.frame span{position:relative;z-index:1;text-align:center;padding:12px}
+.ar-45{aspect-ratio:4/5}
+/* Real portrait. Top/left/right are hard edges that rely on an exact colour match to the page (scripts/
+   process-portrait.cjs), invisible against a flat background. The bottom fade is a plain CSS gradient overlay,
+   not baked into the image: object-fit:cover crops the source to whatever box size/aspect the layout produces
+   (this differs by breakpoint — see the 1024px override below), so a fade baked into fixed source pixels can
+   end up entirely inside the part that gets cropped away and never shown. A gradient sized in % of the box
+   always sits on the box as actually rendered. */
+.portrait{aspect-ratio:4/5;overflow:hidden;background:var(--bg-page);position:relative}
+.portrait img{width:100%;height:100%;object-fit:cover;object-position:50% 12%;display:block}
+.portrait::after{content:"";position:absolute;inset:auto 0 0 0;height:30%;background:linear-gradient(to bottom,transparent,var(--bg-page));pointer-events:none}
+
+/* connect */
+.form-card{background:var(--surface-grad);border:1px solid var(--border-subtle);border-radius:var(--r-lg);padding:var(--sp-6);display:grid;gap:var(--sp-5)}
+@media(min-width:1024px){.form-card{padding:var(--sp-8)}}
+@media(min-width:1024px){.connect-intro{position:sticky;top:calc(var(--header-h) + 24px)}}
+.form-note{font-size:13px;color:var(--text-muted)}
+.form-note a{color:var(--ink-200);text-underline-offset:3px}
+.hp{position:absolute;left:-10000px;width:1px;height:1px;overflow:hidden}
+
+/* cta band + footer */
+/* The last call-to-action lives inside the footer itself (its own top section), not as a separate page section
+   above it — one continuous block instead of a CTA and a footer stacked back to back. */
+/* No top border below 1024px: the footer's own CTA is meant to flow directly out of whatever section precedes
+   it (FAQ, the trial form, …), not be cut off from it by a rule. Kept at ≥1024px, where the footer sits in its
+   own two-column layout and still needs a line to mark where it starts. */
+.footer{padding:var(--sp-10) 0 var(--sp-9)}
+@media(min-width:1024px){.footer{border-top:1px solid var(--border-subtle)}}
+.footer-top{margin-bottom:var(--sp-8)}
+/* The 16ch cap keeps the heading tight in the ≥1024px two-column layout (footer-cta is a narrow 640px-max
+   column there) — below that, footer-cta is the full container width, so the same cap just forced an early,
+   cramped-looking wrap instead of letting the heading use the width it actually has. */
+@media(min-width:1024px){.footer-cta .t-h1{max-width:16ch}}
+/* The single primary CTA button fills the full width below 1024px, matching the thumb-friendly full-width
+   buttons used elsewhere on mobile (the hero, the trial section) instead of sitting as a narrow, content-sized
+   pill on its own line. */
+@media(max-width:1023.98px){.footer-cta .row .btn{width:100%}}
+/* The secondary "have a question? chat on WhatsApp" CTA repeats a button already on screen moments earlier
+   (the hero, or the page's own trial section) — below 1024px, where the whole footer is one vertical scroll
+   away from that same button, it read as clutter rather than a genuine second path. Kept at ≥1024px, where the
+   footer sits in its own two-column layout further from those other CTAs. */
+@media(max-width:1023.98px){.footer-cta-secondary{display:none}}
+/* Below 1024px, the brand block is a clearly secondary block underneath the CTA, not a same-weight block
+   running straight into it — its own divider and real top space mark where the primary CTA ends, and the
+   smaller wordmark + muted contact list keep it from competing with the CTA above it. At ≥1024px it instead
+   sits beside the CTA as its own column (see that block below), so the divider/spacing here is undone there. */
+.footer-brand{display:flex;flex-direction:column;gap:20px;margin-top:var(--sp-8);padding-top:var(--sp-7);border-top:1px solid var(--border-subtle)}
+.footer-brand .wordmark img{height:24px}
+.footer-brand .t-caption{max-width:36ch}
+@media(min-width:700px){.footer-brand{flex-direction:row;justify-content:space-between;align-items:start;flex-wrap:wrap}}
+.foot-links{display:flex;flex-direction:column}
+/* :visited is included explicitly — without it, a browser's own default visited-link colour (which can be a
+   strong yellow/orange in some Android dark themes) shows through on whichever of these links was last opened,
+   making it look like a stray one-off styling bug rather than a consistent, muted contact list. */
+.flink,.flink:visited{display:flex;align-items:center;gap:12px;min-height:var(--tap);text-decoration:none;font-weight:600;color:var(--text-secondary)}
+.flink:hover{color:var(--accent-500)}
+.flink .icon{width:20px;height:20px}
+/* ≥1024px only: the CTA and the brand block move from stacked into one row, so the divider/extra top space
+   that marks "secondary block starts here" below 1024px no longer applies — the row's own gap does that job. */
+@media(min-width:1024px){
+  .footer-top{display:flex;flex-direction:row;justify-content:space-between;align-items:flex-start;gap:var(--sp-9);margin-bottom:var(--sp-9)}
+  .footer-cta{flex:1 1 60%;max-width:640px}
+  .footer-brand{flex:0 0 auto;flex-direction:column;flex-wrap:nowrap;gap:36px;min-width:260px;margin-top:0;padding-top:0;border-top:0}
+  .footer-brand .wordmark img{height:28px}
+  .foot-links{gap:20px}
+}
+/* align-items:center, not the flex default (stretch): .legal a has its own min-height:var(--tap) tap-target box
+   with its text centered inside; the plain copyright <span> next to it has no such box, so under stretch it
+   was pulled to the row's full height and just sat at the top of it — one baseline higher than the link. */
+.legal{margin-top:var(--sp-7);padding-top:var(--sp-5);border-top:1px solid var(--border-subtle);display:flex;flex-wrap:wrap;align-items:center;gap:8px 24px;justify-content:space-between}
+.legal a{color:var(--text-muted);text-underline-offset:3px;min-height:var(--tap);display:inline-flex;align-items:center}
+
+/* prose (privacy) */
+.prose{display:grid;gap:var(--sp-4);max-width:68ch}
+.prose h2{font:700 28px/1.1 var(--font-display);margin-top:var(--sp-6)}
+.prose ul{display:grid;gap:8px;padding-left:20px;list-style:disc;color:var(--text-secondary)}
+.prose p{color:var(--text-secondary)}
+.prose a{color:var(--accent-500);text-underline-offset:4px}
+
+/* Home hero: immersive full-bleed mobile/tablet treatment vs. the unchanged desktop split (see index.astro). */
+.hero-desktop-split{display:none}
+@media(min-width:1024px){.hero-desktop-split{display:grid}}
+
+/* Fills the viewport (minus the header) and docks the CTAs at the very bottom — the row (photo + copy) is the
+   flexible piece (flex:1 below), so it grows to fill whatever space is available on a given screen instead of
+   leaving a gap between the buttons and the fold. */
+.hero-immersive{display:flex;flex-direction:column;min-height:calc(100dvh - var(--header-h));padding:var(--sp-4) 0 max(var(--sp-5),env(safe-area-inset-bottom))}
+@media(min-width:1024px){.hero-immersive{display:none}}
+
+/* Copy and photo side by side, NOT the photo full-bleed behind the text — the mockup's photo stays sharp and
+   confined to its own ~44% column; what makes the boundary invisible is colour-matching (scripts/
+   process-portrait.cjs) plus the soft edge fades below, not washing the photo out under the text. The row
+   deliberately isn't wrapped in .container: a symmetric container would put a gutter on the photo's right side
+   too, recreating a visible "card" edge. flex:1 lets the row absorb extra screen height; the copy column then
+   centers its own (shorter) content within that taller row instead of stretching the text itself. */
+/* Pinned near the top of the hero, above the row entirely — not part of the centered copy block below, so it
+   stays put right under the header regardless of how tall the row grows on a given screen. */
+.hero-immersive-pill{padding-top:var(--sp-3);padding-bottom:var(--sp-5)}
+.hero-immersive-row{display:flex;align-items:stretch;gap:var(--sp-4);flex:1 1 auto;min-height:0}
+/* flex-start, not centered: the eyebrow's own top needs to land at roughly the same height as his head in the
+   photo (object-position's 8% vertical offset, next door, keeps his head near the top of the row too — see
+   .hero-immersive-media img below), not wherever a vertically-centered block happens to fall. The padding-top
+   here is what actually places it; tuned against the photo's own framing rather than derived mathematically. */
+.hero-immersive-copy{flex:0 1 56%;min-width:0;min-height:0;padding-left:var(--gutter);padding-top:clamp(14px,4.5vh,40px);display:flex;flex-direction:column;justify-content:flex-start}
+/* line-height:1 (the shared .eyebrow default) is fine for a single line but crams two wrapped lines together —
+   this column is narrow enough that "Personal training with Akhil" always wraps, so it needs real leading. */
+.hero-immersive-copy .eyebrow{line-height:1.4}
+/* Narrow column + this size wraps into a short phrase per line (matching the mockup's rhythm), not the much
+   wider block the shared 60–96px clamp assumes. Real gap from the eyebrow above it — 8px read as the two
+   sitting in one merged block rather than two distinct lines. */
+.hero-immersive-copy .hero-title{font-size:clamp(36px,13.5vw,54px);margin-top:20px}
+.hero-immersive-media{flex:0 0 44%;position:relative;overflow:hidden;background:var(--bg-page)}
+/* Shifted well right of center: at this column's narrow width, a centered crop puts his arm/shirt (mid-grey,
+   not background) right at the left edge, which is what read as a hard line against the solid-black text
+   column next to it. Shifting the crop right means the left edge instead shows more of the photo's own
+   (colour-matched) dark backdrop, so the fade below has an easy, already-dark surface to blend from. */
+.hero-immersive-media img{width:100%;height:100%;object-fit:cover;object-position:66% 8%;display:block}
+/* Fade at the edges of the photo — bottom (so the CTAs never sit on visible photo detail) and a wide strip on
+   the left, wide enough that the transition from solid black to photo is gradual across a real distance, not a
+   perceptible line. Masked out over the top ~30% (his face) so the fade only ever touches his torso/arm below
+   it — the left fade was dimming his face along with the seam it was meant to fix. */
+.hero-immersive-media::after{content:"";position:absolute;inset:0;background:
+  linear-gradient(to bottom, transparent 74%, var(--bg-page) 96%),
+  linear-gradient(to right, var(--bg-page) 0%, rgba(8,8,9,.75) 16%, transparent 40%);
+  mask-image:linear-gradient(to bottom, transparent 28%, black 40%);
+  -webkit-mask-image:linear-gradient(to bottom, transparent 28%, black 40%);
+}
+
+.hero-immersive-body{padding-top:var(--sp-5)}
+.hero-cta-immersive{display:grid;gap:10px}

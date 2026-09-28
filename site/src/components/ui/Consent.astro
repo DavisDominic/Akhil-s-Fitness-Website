@@ -1,0 +1,12 @@
+---
+interface Props { id: string; name?: string; checked?: boolean; error?: string }
+const { id, name = id, checked, error } = Astro.props;
+import Icon from './Icon.astro';
+---
+<div class:list={['field', error && 'error']}>
+  <label class="check" for={id}>
+    <input type="checkbox" id={id} name={name} checked={checked} required aria-describedby={error ? `${id}-msg` : undefined} aria-invalid={error ? 'true' : undefined} />
+    <span><slot>I agree for this testimonial to be displayed publicly on the Akhil’s Fitness Coaching website with my name, society and photo (if I add one).</slot></span>
+  </label>
+  {error && <div class="msg" id={`${id}-msg`} role="alert"><Icon name="alert" />{error}</div>}
+</div>

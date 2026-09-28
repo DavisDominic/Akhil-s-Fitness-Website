@@ -1,0 +1,12 @@
+---
+// Real logo (replaces the earlier text-based placeholder). Brand name: Akhil Fitness.
+// iconOnly swaps in just the "A" mark (no "AKHIL FITNESS" wordmark text) — used in the top nav, where the
+// full lockup next to the nav links/CTA read as crowded.
+interface Props { height?: number; iconOnly?: boolean }
+const { height, iconOnly = false } = Astro.props;
+const src = iconOnly ? '/images/logo-icon.png' : '/images/logo.png';
+const w = iconOnly ? 463 : 1316;
+---
+<a class="wordmark" href="/" aria-label="Akhil Fitness, home">
+  <img src={src} alt={iconOnly ? '' : 'Akhil Fitness'} width={w} height="305" style={height ? `height:${height}px` : undefined} />
+</a>

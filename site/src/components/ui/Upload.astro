@@ -1,0 +1,15 @@
+---
+// Photo picker markup (Design System 4.5). Behaviour (resize to WebP, validation) is added with the testimonial form.
+import Icon from './Icon.astro';
+interface Props { id: string; name?: string; state?: 'empty' | 'filled' | 'error'; fileName?: string; detail?: string; error?: string }
+const { id, name = id, state = 'empty', fileName, detail, error } = Astro.props;
+---
+<div class:list={['upload', state === 'filled' && 'filled', state === 'error' && 'bad']}>
+  <div class="ic"><Icon name={state === 'error' ? 'alert' : 'upload'} /></div>
+  <div>
+    {state === 'empty' && <><b><label for={id}>Add a photo <span class="muted" style="font-weight:500">(optional)</span></label></b><small>JPG, PNG or WebP · up to 10 MB</small></>}
+    {state === 'filled' && <><b>{fileName}</b><small>{detail}</small></>}
+    {state === 'error' && <><b>{error}</b><small>Choose a smaller photo. The rest of your form is safe.</small></>}
+  </div>
+  <input class="sr" type="file" id={id} name={name} accept="image/jpeg,image/png,image/webp" />
+</div>

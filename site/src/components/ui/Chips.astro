@@ -1,0 +1,20 @@
+---
+// Multi-choice checkbox chips (goal selector). No native "at least one checked" constraint exists for a checkbox
+// group, so `required` is only reflected via aria-required here — validateTrial enforces it for real.
+interface Option { value: string; label: string }
+interface Props { name: string; label: string; options: Option[]; selected?: string[]; required?: boolean; error?: string; id?: string }
+const { name, label, options, selected = [], required, error, id = `${name}-group` } = Astro.props;
+import Icon from './Icon.astro';
+---
+<div class:list={['field', error && 'error']}>
+  <span class="lbl" id={`${id}-l`}>{label}</span>
+  <div class="chips" role="group" aria-labelledby={`${id}-l`} aria-required={required ? 'true' : undefined} aria-describedby={error ? `${id}-msg` : undefined}>
+    {options.map((o) => (
+      <label class="chip">
+        <input type="checkbox" name={name} value={o.value} checked={selected.includes(o.value)} />
+        <span><Icon name="check" />{o.label}</span>
+      </label>
+    ))}
+  </div>
+  {error && <div class="msg" id={`${id}-msg`} role="alert"><Icon name="alert" />{error}</div>}
+</div>

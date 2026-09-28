@@ -1,0 +1,222 @@
+---
+import Base from '../layouts/Base.astro';
+import Button from '../components/ui/Button.astro';
+import Icon from '../components/ui/Icon.astro';
+import Pill from '../components/Pill.astro';
+import TestimonialCard from '../components/TestimonialCard.astro';
+import { site, trialHref, trialLabel, waGeneral } from '../data/site';
+import { sampleTestimonials } from '../data/testimonials';
+
+// Copy: PRD §47 "Final website copy" (HOME). Sequence: Recognition, Promise, Philosophy, Value, Proof, Authority, Fit, Trial, FAQ, CTA.
+// Training modalities: condensed from Akhil's own category breakdown (one bullet per group of related items,
+// not one bullet per single item — matching the density of the mockup's own "Personalised Workout Plan" card).
+const training: [string, string[]][] = [
+  ['Personalised Workout Plan', [
+    'Beginner to advanced programs',
+    'Goal-based training for muscle building, fat loss, strength, general fitness, endurance, mobility & flexibility and body recomposition',
+    'Plans adjusted according to age, experience, lifestyle and limitations',
+  ]],
+  ['Strength & Weight Training', [
+    'Full-body, upper/lower body and push/pull/legs splits',
+    'Compound and isolation exercises with progressive overload',
+    'Strength and muscle development',
+  ]],
+  ['Functional Training', [
+    'Movement-based training for balance, coordination and core stability',
+    'Unilateral training',
+    'Carrying, pushing, pulling, squatting, hinging and rotational movements',
+  ]],
+  ['Mobility & Flexibility', [
+    'Dynamic warm-ups and active or static stretching',
+    'Joint mobility work',
+    'Recovery sessions and post-workout stretching',
+  ]],
+  ['Conditioning', [
+    'HIIT, cardio conditioning and circuit training',
+    'Endurance training',
+    'Rope workouts, ladder and cone drills',
+  ]],
+  ['Fitness Boxing', [
+    'Boxing basics, footwork and punch combinations',
+    'Pad work and conditioning',
+    'Coordination and reaction drills',
+  ]],
+  ['Bodyweight & Athletic Training', [
+    'Animal flow and isometric training',
+    'Bodyweight strength and agility',
+    'Explosive movements and athletic conditioning',
+  ]],
+  ['Recovery', [
+    'Foam rolling and muscle relaxation',
+    'Mobility recovery and cool-down protocols',
+    'Recovery-day programming',
+  ]],
+];
+const faq = [
+  ['Do I need to already be fit to start?', 'No. Training starts from where you are.'],
+  ['Do I need gym equipment at home?', 'No. Akhil trains clients in apartment society gyms. Your training setup can be discussed based on your needs.'],
+  ['I have an old injury or a bad knee/back. Can I still train?', 'Let Akhil know about your condition before training so it can be taken into account. If you need medical clearance, get that from your healthcare professional first.'],
+  ['How much time do I need to commit?', 'That depends on your goals and schedule. The important thing is finding a routine you can follow consistently.'],
+  ['What if I’ve tried before and fallen off?', 'That’s part of what coaching is for. Akhil will help you understand what got in the way, reconnect with your goals and get back into a routine.'],
+  ['Why isn’t pricing listed here?', 'Ongoing training is discussed based on your goals, requirements and available training schedule. You can discuss the details with Akhil after your trial.'],
+];
+---
+<Base title="Akhil’s Fitness Coaching | Personal training that builds fitness that lasts" current="home" bar>
+  <!-- HERO: recognition + promise. Two different arrangements sharing the same copy, toggled by display:none —
+       a genuinely different DOM shape per breakpoint (full-bleed photo vs. a side-by-side grid) isn't reachable
+       with responsive CSS alone. Below 1024px: copy and photo side by side, CTAs underneath. From 1024px: the
+       existing side-by-side split, unchanged. No proof/metrics strip on Home at either tier — it only ever
+       repeated the same 4+/2,400+/50+ figures shown on About. -->
+  <section class="hero" aria-labelledby="hero-h hero-h-m">
+
+    <!-- MOBILE / TABLET (<1024): copy and photo side by side (photo flush to the viewport's right edge, no
+         gutter, stretched to match the copy column's own height), then full-width CTAs docked at the bottom of
+         the screen. The row is the flexible element (flex:1) so it grows to fill whatever space is available.
+         The photo stays sharp and confined to its own column (not washed out under the text) — matching the
+         mockup exactly means an invisible SEAM between the two, not the photo sitting behind the text. -->
+    <div class="hero-immersive" data-hide-bar>
+      <div class="container hero-immersive-pill"><Pill /></div>
+      <div class="hero-immersive-row">
+        <div class="hero-immersive-copy">
+          <p class="eyebrow">Personal training with Akhil</p>
+          <h1 class="t-display hero-title" id="hero-h-m">Don’t just get fit. <span>Learn how to stay fit.</span></h1>
+        </div>
+        <div class="hero-immersive-media">
+          <img
+            src="/images/akhil-portrait-816.webp"
+            srcset="/images/akhil-portrait-480.webp 480w, /images/akhil-portrait-816.webp 816w"
+            sizes="50vw"
+            width="816" height="1361"
+            alt="Akhil, personal trainer, smiling with his arms crossed"
+            fetchpriority="high" decoding="async"
+          />
+        </div>
+      </div>
+      <div class="container hero-immersive-body">
+        <div class="hero-cta-immersive">
+          <Button href={trialHref} block icon="arrow-right" data-track="cta-trial" data-where="hero-immersive">{trialLabel()}</Button>
+          <Button href={waGeneral()} variant="secondary" block iconBefore="whatsapp" target="_blank" rel="noopener" data-track="whatsapp" data-where="hero-immersive">Chat on WhatsApp</Button>
+        </div>
+      </div>
+    </div>
+
+    <!-- DESKTOP (≥1024): unchanged side-by-side split -->
+    <div class="container split hero-desktop-split">
+      <div class="span-4 span-8-md span-8-lg hero-copy">
+        <Pill />
+        <p class="eyebrow mtop-3">Personal training with Akhil</p>
+        <h1 class="t-display hero-title" id="hero-h">Don’t just get fit.<br /><span>Learn how to stay fit.</span></h1>
+        <p class="t-lead">Personalised, hands-on coaching built around your goals, your starting point and your life.</p>
+        <div class="hero-cta row">
+          <Button href={trialHref} icon="arrow-right" data-track="cta-trial" data-where="hero">{trialLabel()}</Button>
+          <Button href={waGeneral()} variant="secondary" iconBefore="whatsapp" target="_blank" rel="noopener" data-track="whatsapp" data-where="hero">Chat on WhatsApp</Button>
+        </div>
+      </div>
+      <div class="span-4 span-8-md span-4-lg hero-media">
+        <figure class="portrait">
+          <img
+            src="/images/akhil-portrait-816.webp"
+            srcset="/images/akhil-portrait-480.webp 480w, /images/akhil-portrait-816.webp 816w"
+            sizes="(min-width: 1024px) 40vw, (min-width: 700px) 50vw, 100vw"
+            width="816" height="1361"
+            alt="Akhil, personal trainer, smiling with his arms crossed"
+            fetchpriority="high" decoding="async"
+          />
+        </figure>
+      </div>
+    </div>
+  </section>
+
+  <!-- PHILOSOPHY: sized to fill roughly a full mobile screen (not a condensed block) — the stat row is pushed
+       to the bottom of that space via justify-content:space-between on the section itself, not a fixed margin,
+       so the gap scales with whatever the device's actual viewport height is instead of being right for only
+       one screen size. The stat row (.phil-stats) is a direct child of the section, not wrapped in .container,
+       so its accent panel can bleed full-width edge to edge on mobile the way the mockup shows. -->
+  <section class="section phil-section" aria-labelledby="phil-h">
+    <div class="container phil-inner">
+      <h2 class="t-h1 wide" id="phil-h">Fitness shouldn’t be something you keep <span>starting over.</span></h2>
+      <div class="mtop-4 wide">
+        <p class="t-lead phil-lead">Akhil’s approach is about making fitness a consistent part of everyday life.</p>
+        <p class="t-lead phil-lead mtop-3 yellow">Build it. Keep it.</p>
+      </div>
+    </div>
+    <div class="phil-stats">
+      <div class="container">
+        <p class="phil-stats-label">Why train with Akhil</p>
+        <div class="phil-stats-row">
+          {site.metrics.map((m) => <div><b>{m.value}</b><span>{m.short}</span></div>)}
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- WHAT TRAINING WITH AKHIL LOOKS LIKE: one expandable card per training modality, closed by default. Built
+       on <details>/<summary> (same accessible, no-JS accordion primitive as the FAQ below) — the number/title/
+       chevron row and the divider under it live inside <summary> so they stay visible while collapsed; the
+       bullet list is the only part that <details> hides until opened. -->
+  <section class="section" aria-labelledby="value-h">
+    <div class="container">
+      <div class="sec-head">
+        <h2 class="t-h2" id="value-h">What training with Akhil <span>looks like.</span></h2>
+      </div>
+      <div class="train-list">
+        {training.map(([t, items], i) => (
+          <div class="train-card-wrap">
+            <details class="card train-card">
+              <summary class="train-summary">
+                <img src="/images/stripe-corner.svg" class="train-stripes" alt="" aria-hidden="true" />
+                <span class="train-row">
+                  <span class="train-no">{String(i + 1).padStart(2, '0')}</span>
+                  <h3>{t}</h3>
+                  <Icon name="chevron-down" class="train-chev" />
+                </span>
+                <span class="train-rule"></span>
+              </summary>
+              <ul class="train-body">
+                {items.map((it) => <li>{it}</li>)}
+              </ul>
+            </details>
+          </div>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <!-- PROOF (sample cards until real, consented testimonials are connected in step 4) -->
+  <section class="section" aria-labelledby="proof-h">
+    <div class="container">
+      <div class="sec-head"><h2 class="t-h2" id="proof-h">Real people. <span>Real progress.</span></h2></div>
+      <div class="tcarousel">
+        {sampleTestimonials.map((t) => <TestimonialCard t={t} />)}
+      </div>
+    </div>
+  </section>
+
+  <!-- EXPERIENCE / AUTHORITY: removed from Home — the 4+/2,400+/50+ figures aren't shown on Home at all any
+       more (no hero proof strip either). Still shown on About (about.astro). -->
+
+  <!-- FAQ: objection clean-up, lighter visual weight -->
+  <section class="section" aria-labelledby="faq-h">
+    <div class="container two">
+      <h2 class="t-h2" id="faq-h">Questions, answered.</h2>
+      <div class="faq">
+        {faq.map(([q, a]) => (
+          <details><summary>{q}<Icon name="plus" /></summary><div class="ans">{a}</div></details>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <!-- FINAL CTA: rendered inside the footer itself (Base.astro forwards this slot to <Footer>), not as a
+       separate section above it. -->
+  <Fragment slot="cta">
+    <h2 class="t-h1" id="final-h">Ready to build something <span>that lasts?</span></h2>
+    <div class="row mtop-3">
+      <Button href={trialHref} size="lg" icon="arrow-right" data-track="cta-trial" data-where="final">{trialLabel()}</Button>
+    </div>
+    <div class="footer-cta-secondary">
+      <p class="sec mtop-3">Have a question first?</p>
+      <div class="row mtop-1"><Button href={waGeneral()} variant="secondary" iconBefore="whatsapp" target="_blank" rel="noopener" data-track="whatsapp" data-where="final">Chat with Akhil on WhatsApp</Button></div>
+    </div>
+  </Fragment>
+</Base>

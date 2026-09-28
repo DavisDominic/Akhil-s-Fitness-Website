@@ -1,0 +1,45 @@
+---
+import Icon from './ui/Icon.astro';
+import { trialHref, trialLabel, waGeneral } from '../data/site';
+---
+<!-- Round floating buttons in the thumb zone (bottom-right), not a full-width bar. Starts hidden: the
+     IntersectionObserver's first callback fires asynchronously, a beat after paint, so defaulting to shown would
+     flash the FAB over the hero's own CTA for an instant on every load. -->
+<div class="fabs is-hidden" id="fabs">
+  <a class="fab fab-secondary" href={waGeneral()} target="_blank" rel="noopener" aria-label="Chat with Akhil on WhatsApp" data-track="whatsapp" data-where="fab">
+    <Icon name="whatsapp" />
+  </a>
+  <a class="fab fab-primary" href={trialHref} aria-label={trialLabel()} data-track="cta-trial" data-where="fab">
+    <Icon name="calendar" />
+  </a>
+</div>
+
+<script>
+  // Hide the FABs while the keyboard is open and while another primary CTA is already on screen.
+  const bar = document.getElementById('fabs');
+  if (bar) {
+    let keyboard = false;
+    const covering = new Set<Element>();
+    const update = () => bar.classList.toggle('is-hidden', keyboard || covering.size > 0);
+    const vv = window.visualViewport;
+    // Gated on an actually-focused text field, not just a shrunk visual viewport on its own — on real phones,
+    // scrolling collapses/expands the browser's own address bar, which shrinks visualViewport.height the same
+    // way a keyboard does. Without the focus check, that scroll-driven shrink alone was enough to flip
+    // "keyboard" true mid-scroll (e.g. right around the Philosophy section) and hide the FAB with no keyboard
+    // actually open — a false positive, not a real hide-while-typing case.
+    const isTyping = () => { const a = document.activeElement; return !!a && (a.tagName === 'INPUT' || a.tagName === 'TEXTAREA'); };
+    const checkKeyboard = () => { keyboard = isTyping() && !!vv && vv.height < window.innerHeight * 0.75; update(); };
+    vv?.addEventListener('resize', checkKeyboard);
+    document.addEventListener('focusin', checkKeyboard);
+    document.addEventListener('focusout', checkKeyboard);
+    if ('IntersectionObserver' in window) {
+      const io = new IntersectionObserver((entries) => {
+        for (const e of entries) e.isIntersecting ? covering.add(e.target) : covering.delete(e.target);
+        update();
+      });
+      document.querySelectorAll('[data-hide-bar]').forEach((el) => io.observe(el));
+    } else {
+      update(); // no IntersectionObserver: show by default rather than staying hidden forever
+    }
+  }
+</script>

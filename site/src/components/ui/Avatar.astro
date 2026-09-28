@@ -1,0 +1,10 @@
+---
+// Initials by default; an uploaded photo replaces them (Design System 4.10). Always a circle.
+interface Props { name: string; src?: string; size?: 'sm' | 'md' | 'lg' }
+const { name, src, size = 'md' } = Astro.props;
+const parts = name.trim().split(/\s+/).filter(Boolean);
+const initials = ((parts[0]?.[0] ?? '') + (parts.length > 1 ? parts[parts.length - 1][0] : '')).toUpperCase();
+---
+{src
+  ? <span class:list={['avatar', size !== 'md' && size]}><img src={src} alt={`Photo of ${name}`} width="64" height="64" loading="lazy" decoding="async" /></span>
+  : <span class:list={['avatar', size !== 'md' && size]} aria-hidden="true">{initials}</span>}

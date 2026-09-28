@@ -1,0 +1,133 @@
+---
+import Base from '../layouts/Base.astro';
+import Button from '../components/ui/Button.astro';
+import Field from '../components/ui/Field.astro';
+import Chips from '../components/ui/Chips.astro';
+import Consent from '../components/ui/Consent.astro';
+import Upload from '../components/ui/Upload.astro';
+import Alert from '../components/ui/Alert.astro';
+import Icon from '../components/ui/Icon.astro';
+import { site, trialLabel, waGeneral } from '../data/site';
+
+// Copy: PRD §47 (CONNECT). Functional page: no sticky CTA bar (the form is the CTA).
+// STEP 2 = markup and layout only. Submission, validation and the API arrive in steps 3 and 4.
+const calUrl = import.meta.env.PUBLIC_CAL_URL as string | undefined; // set when the Cal.com event exists (addendum §3)
+const goals = ['Weight loss', 'Strength', 'Stamina', 'Mobility', 'General fitness', 'Other'].map((l) => ({ value: l.toLowerCase().replace(/ /g, '-'), label: l }));
+---
+<Base
+  title="Book a free trial | Akhil’s Fitness Coaching"
+  description="Book a free personal-training trial with Akhil, ask a question on WhatsApp or share your experience."
+  current="connect"
+>
+  <section class="section flush" style="padding-top:var(--sp-9)">
+    <div class="container split top">
+      <!-- FREE TRIAL FORM (primary) -->
+      <div class="span-4 span-8-md span-5-lg connect-intro">
+        <p class="eyebrow">Free trial</p>
+        <h2 class="t-h2 mtop-2">Start with a session.</h2>
+      </div>
+
+      <div id="trial" class="span-4 span-8-md span-7-lg connect-form" style="scroll-margin-top:calc(var(--header-h) + 16px)">
+        <form class="form-card" method="post" action="/api/trial" novalidate data-form="trial" data-wa-base={`https://wa.me/${site.whatsapp}`}>
+          <Field id="t-name" name="name" label="Name" placeholder="Your name" autocomplete="name" required />
+          <Field id="t-wa" name="whatsapp" label="WhatsApp number" prefix="+91" type="tel" inputmode="numeric" autocomplete="tel-national" placeholder="XXXXX XXXXX" required />
+          <Field id="t-soc" name="society" label="Apartment / Society" placeholder="Your society name" autocomplete="off" required />
+          <Field id="t-occ" name="occupation" label="Occupation" optional placeholder="e.g. Software engineer" />
+          <Chips name="goal" label="What would you most like to work on?" options={goals} required />
+          <div class="field" id="goal-other" hidden>
+            <label for="t-goal-other">Tell us more <span class="opt">(optional)</span></label>
+            <input class="ctl" id="t-goal-other" name="goalOther" maxlength="120" placeholder="e.g. Getting back to running" />
+          </div>
+          <Field id="t-time" name="regularTrainingTime" label="If you start training with Akhil, what time would be ideal for your regular workouts?" placeholder="e.g. Weekday mornings around 8 AM" required />
+          <!-- honeypot: real visitors never see or fill this -->
+          <div class="hp" aria-hidden="true"><label>Website<input type="text" name="website" tabindex="-1" autocomplete="off" /></label></div>
+          <Button type="submit" block size="lg" icon="arrow-right" data-track="trial-submit">{trialLabel()}</Button>
+          <!-- Failure state: values stay in the form; retry reuses the same idempotency key; WhatsApp is the fallback. -->
+          <div id="trial-error" class="alert bad" role="alert" hidden>
+            <Icon name="alert" />
+            <div>
+              <b>That didn’t send</b>
+              <p data-error-text>Your details are still here.</p>
+              <div class="row mtop-1">
+                <button type="button" class="btn primary sm" data-retry>Try again</button>
+                <a class="btn secondary sm" data-wa href={waGeneral()} target="_blank" rel="noopener" data-track="whatsapp" data-where="form-error"><Icon name="whatsapp" size="sm" />WhatsApp</a>
+              </div>
+            </div>
+          </div>
+        </form>
+
+        <!-- Success states (revealed by trial-form.ts). Wording is DRAFT for Akhil to approve. -->
+        <div id="trial-success" class="form-card" hidden>
+          <div class="alert ok" role="status">
+            <Icon name="check-circle" />
+            <div>
+              <b tabindex="-1" data-focus>Request received</b>
+              <p>Thanks, <span data-name></span>. Akhil will contact you on WhatsApp within 24 hours to arrange your free trial.</p>
+            </div>
+          </div>
+          <Button href={waGeneral()} variant="secondary" block iconBefore="whatsapp" target="_blank" rel="noopener" data-wa-now data-track="whatsapp" data-where="success">Message Akhil now to speed things up</Button>
+          {calUrl && <p class="sec">Prefer to pick a slot yourself? <a class="tlink" href={calUrl} target="_blank" rel="noopener" data-track="cal-open">Choose a time</a></p>}
+          <ol class="steps">
+            <li class="step"><span class="no">01</span><div><h3 class="t-h4">Confirm</h3><p>Akhil reaches out on WhatsApp.</p></div></li>
+            <li class="step"><span class="no">02</span><div><h3 class="t-h4">Train</h3><p>Experience the coaching together.</p></div></li>
+          </ol>
+        </div>
+        <div id="waitlist-success" class="form-card" hidden>
+          <div class="alert ok" role="status">
+            <Icon name="check-circle" />
+            <div>
+              <b tabindex="-1" data-focus>You’re on the list</b>
+              <p>Thanks, <span data-name></span>. Akhil is fully booked right now and will message you on WhatsApp as soon as a training slot opens up.</p>
+            </div>
+          </div>
+          <Button href={waGeneral()} variant="secondary" block iconBefore="whatsapp" target="_blank" rel="noopener" data-wa-now data-track="whatsapp" data-where="success">Message Akhil</Button>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- TESTIMONIAL FORM (tertiary) -->
+  <section class="section" id="testimonial" aria-labelledby="testi-h">
+    <div class="container" style="max-width:720px;margin-inline:auto">
+      <p class="eyebrow">Testimonial</p>
+      <h2 class="t-h2 mtop-2" id="testi-h">Trained with Akhil? <span>Share your experience.</span></h2>
+      <div class="mtop-2"><Alert tone="info" title="Reviewed before it appears">Your testimonial will be reviewed by Akhil before it appears on the website.</Alert></div>
+
+      <form class="form-card mtop-3" method="post" action="/api/testimonial" enctype="multipart/form-data" novalidate data-form="testimonial">
+        <Field id="w-name" name="name" label="Name" placeholder="Your name" autocomplete="name" required />
+        <Field id="w-soc" name="society" label="Apartment / Society" placeholder="Your society" autocomplete="off" required />
+        <Field id="w-occ" name="occupation" label="Occupation" optional placeholder="Optional" />
+        <Field id="w-exp" name="quote" label="Your experience" multiline placeholder="Tell us about your experience training with Akhil." maxlength={1000} required />
+        <Upload id="w-photo" name="photo" />
+        <div class="hp" aria-hidden="true"><label>Website<input type="text" name="website" tabindex="-1" autocomplete="off" /></label></div>
+        <Consent id="w-consent" name="consent" />
+        <Button type="submit" block size="lg" data-track="testimonial-submit">Submit testimonial</Button>
+        <p class="form-note">Thank you, this means a lot. You can ask for your testimonial to be removed at any time. <a href="/privacy">Privacy</a>.</p>
+        <div id="testimonial-status" aria-live="polite"></div>
+      </form>
+    </div>
+  </section>
+
+  <!-- Rendered inside the footer itself (Base.astro forwards this slot to <Footer>). -->
+  <Fragment slot="cta">
+    <h2 class="t-h1" id="final-h">Ready to <span>start?</span></h2>
+    <div class="row mtop-3">
+      <Button href="#trial" size="lg" icon="arrow-right" data-track="cta-trial" data-where="connect-final">{trialLabel()}</Button>
+    </div>
+  </Fragment>
+</Base>
+
+<script>
+  import '../scripts/trial-form';
+</script>
+<script>
+  // Testimonial form: submission is wired in step 4. Until then keep the preview honest instead of posting to a missing route.
+  document.querySelectorAll<HTMLFormElement>('form[data-form="testimonial"]').forEach((f) =>
+    f.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const s = document.getElementById(`${f.dataset.form}-status`);
+      if (s) s.innerHTML = '<div class="alert info"><div><b>Preview only</b><p>Form submission is wired up in the next build step.</p></div></div>';
+    }),
+  );
+</script>

@@ -1,0 +1,24 @@
+@import "tailwindcss";
+@import "./tokens.css";
+@import "./base.css" layer(base);
+@import "./components.css" layer(components);
+@import "./layout.css" layer(components);
+
+/* Tailwind utilities read the design tokens (single source of truth: tokens.css). */
+@theme inline {
+  --color-ink-950: var(--ink-950); --color-ink-900: var(--ink-900); --color-ink-850: var(--ink-850);
+  --color-ink-800: var(--ink-800); --color-ink-700: var(--ink-700); --color-ink-600: var(--ink-600);
+  --color-ink-500: var(--ink-500); --color-ink-400: var(--ink-400); --color-ink-300: var(--ink-300); --color-ink-200: var(--ink-200);
+  --color-paper: var(--paper);
+  --color-accent: var(--accent-500); --color-accent-400: var(--accent-400); --color-accent-600: var(--accent-600);
+  --color-danger: var(--danger); --color-warning: var(--warning); --color-success: var(--success); --color-info: var(--info);
+  --font-display: "Barlow Condensed", "Arial Narrow", Impact, sans-serif;
+  --font-body: "Manrope", system-ui, Arial, sans-serif;
+  --radius-sm: 10px; --radius-md: 14px; --radius-lg: 20px; --radius-xl: 28px;
+}
+
+/* Overrides Tailwind's built-in `container` so the design-system layout (Design System: layout tokens) wins. */
+@utility container {
+  width: min(var(--container), 100% - 2 * var(--gutter));
+  margin-inline: auto;
+}

@@ -1,0 +1,41 @@
+---
+import Icon from './ui/Icon.astro';
+import Wordmark from './Wordmark.astro';
+import { site, waGeneral } from '../data/site';
+
+// hasCta is passed explicitly by Base.astro (which forwards the "cta" slot unconditionally so that pages without
+// one, e.g. 404/privacy, still compile) — Footer can't reliably re-detect emptiness itself: once Base wraps the
+// forwarded <slot name="cta" /> in a <Fragment slot="cta">, Astro.slots.has('cta') here sees that wrapper as
+// "provided" even when the page passed nothing, and an empty div was rendering on every page.
+interface Props { hasCta?: boolean }
+const { hasCta = false } = Astro.props;
+---
+<footer class="footer">
+  <div class="container">
+    <!-- ≥1024px: the CTA and the brand/contact block sit side by side in one row (see 26.png/27.png reference),
+         not stacked — footer-top only becomes that row at that width; below it the two blocks stack exactly as
+         before (footer-cta's own divider, then the brand block). -->
+    <div class="footer-top">
+      {hasCta && (
+        <div class="footer-cta" data-hide-bar>
+          <slot name="cta" />
+        </div>
+      )}
+      <div class="footer-brand">
+        <div>
+          <Wordmark />
+          <p class="t-caption mtop-1">Personal training in apartment society gyms. {site.tagline}</p>
+        </div>
+        <div class="foot-links">
+          <a class="flink" href={waGeneral()} target="_blank" rel="noopener" data-track="whatsapp" data-where="footer"><Icon name="whatsapp" />WhatsApp</a>
+          <a class="flink" href={`tel:${site.phone.replace(/\s/g, '')}`}><Icon name="phone" />{site.phone}</a>
+          <a class="flink" href={`mailto:${site.email}`}><Icon name="mail" />{site.email}</a>
+        </div>
+      </div>
+    </div>
+    <div class="legal t-caption">
+      <span>© {new Date().getFullYear()} Akhil’s Fitness Coaching</span>
+      <a href="/privacy">Privacy</a>
+    </div>
+  </div>
+</footer>

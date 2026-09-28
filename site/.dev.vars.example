@@ -1,0 +1,12 @@
+# Copy to .dev.vars for local work. In production these are Cloudflare secrets (wrangler secret put NAME).
+# Local stand-ins: with DEV_STUBS=1, Telegram/Sheet messages are written to the dev_outbox table instead of being sent.
+DEV_STUBS=1
+IP_HASH_SALT=change-me
+TELEGRAM_WEBHOOK_SECRET=change-me
+TELEGRAM_CHAT_ID=111111111
+CRON_SECRET=change-me
+# Real values (leave unset in dev):
+# TELEGRAM_BOT_TOKEN=123456:ABC...
+# SHEET_WEBHOOK_URL=https://script.google.com/macros/s/.../exec
+# SHEET_WEBHOOK_SECRET=change-me
+# TURNSTILE_SECRET=...

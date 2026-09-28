@@ -1,0 +1,91 @@
+---
+import Base from '../layouts/Base.astro';
+import Button from '../components/ui/Button.astro';
+import Metrics from '../components/Metrics.astro';
+import { trialHref, trialLabel, waGeneral } from '../data/site';
+
+// Copy: PRD §47 (ABOUT). Calmer and more personal than Home; no credentials wall, no testimonials, no résumé (PRD §12).
+// Condensed from Akhil's own "why invest in a personal trainer" writing — his reasoning, not a generic feature
+// list — into the same numbered-step format the old "Approach" section used.
+const whyTrainer = [
+  ['More than sweat', 'A workout alone isn’t the same as understanding your body.'],
+  ['Assessed, not assumed', 'We start from your strength, mobility and limits — not a generic plan.'],
+  ['Built around you', 'Your goals, your lifestyle, your pace. Not someone else’s.'],
+  ['Evolves with you', 'Training changes as your strength, energy and confidence grow.'],
+  ['For life, not months', 'The goal is a lifestyle you keep, not a phase you quit.'],
+];
+---
+<Base
+  title="About Akhil | Fitness that works in real life"
+  description="Meet Akhil: a personal trainer who builds sustainable fitness through personalised, hands-on coaching in apartment society gyms."
+  current="about"
+  bar
+>
+  <section class="section flush" aria-labelledby="about-h" style="padding-top:var(--sp-9)">
+    <div class="container split">
+      <div class="span-4 span-8-md span-7-lg">
+        <h1 class="t-h1" id="about-h">Build fitness <span>you can keep.</span></h1>
+        <p class="t-lead mtop-3 narrow">The goal isn’t to make you depend on a trainer forever. It’s to help you build better habits, understand your training and become more consistent over time.</p>
+      </div>
+      <figure class="portrait span-4 span-8-md span-5-lg">
+        <img
+          src="/images/akhil-portrait-816.webp"
+          srcset="/images/akhil-portrait-480.webp 480w, /images/akhil-portrait-816.webp 816w"
+          sizes="(min-width: 1024px) 40vw, (min-width: 700px) 50vw, 100vw"
+          width="816" height="1361"
+          alt="Akhil, personal trainer, smiling with his arms crossed"
+          fetchpriority="high" decoding="async"
+        />
+      </figure>
+    </div>
+  </section>
+
+  <!-- STORY: condensed from Akhil's own long-form writing (his case for personal training + his fitness
+       journey) into a short, personal gist — not a résumé/timeline (PRD §12 still applies here), just the two
+       beats that actually explain who he is and why he trains the way he does. -->
+  <section class="section" aria-labelledby="story-h">
+    <div class="container two">
+      <div>
+        <p class="eyebrow">Akhil’s story</p>
+        <h2 class="t-h2 mtop-2" id="story-h">I’ve started from zero <span>more than once.</span></h2>
+      </div>
+      <div>
+        <p class="t-lead narrow">Fitness has been part of my life since I was a kid — always active, always moving. I started training seriously at 16, competed, and won my first competition. Then an accident took my strength away almost overnight, and I had to rebuild from zero. It’s the hardest lesson I’ve learned: starting over is hard, and everyone starts from a different place.</p>
+        <p class="t-lead mtop-3 narrow">That’s why personal training, done properly, isn’t one-size-fits-all. It’s understanding your body and your life first, then building training around that — the same way I had to rebuild mine.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" aria-labelledby="why-h">
+    <div class="container two">
+      <div>
+        <p class="eyebrow">Why invest in a trainer</p>
+        <h2 class="t-h2 mtop-2" id="why-h">There’s more to fitness <span>than just exercise.</span></h2>
+        <p class="t-lead mtop-2 narrow">Anyone can go to a gym and work out. A trainer’s job is different.</p>
+      </div>
+      <ol class="steps why-steps">
+        {whyTrainer.map(([t, d], i) => (
+          <li class="step"><span class="no">{String(i + 1).padStart(2, '0')}</span><div><h3 class="t-h4">{t}</h3><p>{d}</p></div></li>
+        ))}
+      </ol>
+    </div>
+  </section>
+
+  <section class="section" aria-labelledby="exp-h">
+    <div class="container">
+      <div class="sec-head"><h2 class="t-h2" id="exp-h">Built through <span>hours of coaching.</span></h2></div>
+      <Metrics />
+    </div>
+  </section>
+
+  <!-- Rendered inside the footer itself (Base.astro forwards this slot to <Footer>). -->
+  <Fragment slot="cta">
+    <h2 class="t-h1" id="cta-h">See if we’re <span>a good fit.</span></h2>
+    <p class="t-lead mtop-2 narrow">Experience the coaching for yourself.</p>
+    <div class="row mtop-3"><Button href={trialHref} size="lg" icon="arrow-right" data-track="cta-trial" data-where="about-cta">{trialLabel()}</Button></div>
+    <div class="footer-cta-secondary">
+      <p class="sec mtop-3">Have a question?</p>
+      <div class="row mtop-1"><Button href={waGeneral()} variant="secondary" iconBefore="whatsapp" target="_blank" rel="noopener" data-track="whatsapp" data-where="about-cta">Chat with Akhil</Button></div>
+    </div>
+  </Fragment>
+</Base>

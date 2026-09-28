@@ -1,0 +1,36 @@
+---
+import Icon from './Icon.astro';
+interface Props {
+  variant?: 'primary' | 'secondary' | 'ghost' | 'inverse';
+  size?: 'sm' | 'md' | 'lg';
+  href?: string;
+  block?: boolean;
+  iconOnly?: boolean;
+  icon?: string;        // trailing icon (or the only icon when iconOnly)
+  iconBefore?: string;  // leading icon
+  busy?: boolean;
+  label?: string;       // required accessible name when iconOnly
+  class?: string;
+  type?: 'button' | 'submit';
+  disabled?: boolean;
+  [attr: string]: unknown; // data-track, target, rel, ... pass straight through
+}
+const { variant = 'primary', size = 'md', href, block, iconOnly, icon, iconBefore, busy, label, class: cls = '', type = 'button', disabled, ...rest } = Astro.props;
+const classes = ['btn', variant, size !== 'md' && size, block && 'wide', iconOnly && 'icon-only', cls];
+const Tag = href ? 'a' : 'button';
+---
+<Tag
+  class:list={classes}
+  href={href}
+  type={href ? undefined : type}
+  disabled={!href && disabled ? true : undefined}
+  aria-busy={busy ? 'true' : undefined}
+  aria-label={iconOnly ? label : undefined}
+  {...rest}
+>
+  {busy && <Icon name="spinner" size="sm" class="spin" />}
+  {!busy && iconBefore && <Icon name={iconBefore} size="sm" />}
+  {!iconOnly && <slot />}
+  {iconOnly && icon && <Icon name={icon} />}
+  {!iconOnly && icon && !busy && <Icon name={icon} size="sm" />}
+</Tag>

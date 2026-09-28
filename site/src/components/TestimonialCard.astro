@@ -1,0 +1,17 @@
+---
+import Avatar from './ui/Avatar.astro';
+import type { Testimonial } from '../data/testimonials';
+// Name + society required, occupation optional (separator omitted when absent). Works with no photo (DS 6.1).
+const { t } = Astro.props as { t: Testimonial };
+const meta = [t.occupation, t.society].filter(Boolean).join(' · ');
+---
+<article class="tcard">
+  {t.sample && <span class="badge warn sample">Sample, not a real client</span>}
+  <img src="/images/quote.svg" class="tcard-quote open" alt="" aria-hidden="true" />
+  <blockquote>{t.quote}</blockquote>
+  <img src="/images/quote.svg" class="tcard-quote close" alt="" aria-hidden="true" />
+  <footer>
+    <Avatar name={t.name} src={t.photo} />
+    <div class="who"><b>{t.name}</b><small>{meta}</small></div>
+  </footer>
+</article>

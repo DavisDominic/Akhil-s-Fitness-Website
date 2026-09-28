@@ -1,0 +1,956 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Akhil Fitness — Design System V5.1</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+/* ============ TOKENS ============ */
+:root{
+  /* ink scale */
+  --ink-950:#080809;--ink-900:#0D0D0F;--ink-850:#121214;--ink-800:#171719;--ink-700:#222225;--ink-600:#303034;--ink-500:#47474B;
+  --ink-400:#8A8A90;   /* muted text  — 5.7:1 on ink-900 */
+  --ink-300:#A8A8AD;   /* secondary   — 8.2:1 */
+  --ink-200:#C9C9CC;   /* body-strong — 12:1 */
+  --paper:#F5F5F1;--white:#fff;
+  /* signal yellow (single brand accent) */
+  --accent-600:#94CC17;--accent-500:#B4F22A;--accent-400:#C6F55A;--accent-300:#D8F98C;--accent-tint:rgba(180,242,42,.14);
+  --accent-grad:linear-gradient(135deg,#C9F53B 0%,#A9E01C 55%,#8FC300 100%);
+  --surface-grad:linear-gradient(60deg,#202023 0%,#141416 55%,#0C0C0D 100%);
+  /* semantic */
+  --danger:#FF6B6F;--warning:#FFB547;--success:#55D68A;--info:#62B6FF;
+  /* semantic aliases */
+  --bg-page:var(--ink-950);--bg-surface:var(--ink-900);--bg-elevated:var(--ink-800);--bg-inverse:var(--paper);
+  --text-primary:var(--paper);--text-secondary:var(--ink-200);--text-muted:var(--ink-400);--text-on-accent:var(--ink-950);--text-on-inverse:var(--ink-950);
+  --border-subtle:#2A2A2D;--border-strong:#454549;--border-control:#6B6B70; /* controls need 3:1 */
+  --accent:var(--accent-500);--focus:var(--accent-400);
+  /* type */
+  --font-display:"Barlow Condensed","Arial Narrow",Impact,sans-serif;--font-body:"Manrope",system-ui,Arial,sans-serif;
+  --fs-display:clamp(48px,13.5vw,120px);--fs-h1:clamp(40px,10vw,64px);--fs-h2:clamp(34px,8vw,48px);--fs-h3:clamp(28px,6vw,36px);--fs-h4:24px;
+  --fs-lg:18px;--fs-md:16px;--fs-sm:14px;--fs-xs:12px;
+  /* space (4px base) */
+  --sp-1:4px;--sp-2:8px;--sp-3:12px;--sp-4:16px;--sp-5:20px;--sp-6:24px;--sp-7:32px;--sp-8:40px;--sp-9:48px;--sp-10:64px;--sp-11:80px;--sp-12:96px;
+  /* radius */
+  --r-xs:6px;--r-sm:10px;--r-md:14px;--r-lg:20px;--r-xl:28px;--r-pill:999px;
+  /* elevation (use sparingly) */
+  --shadow-1:0 8px 24px rgba(0,0,0,.24);--shadow-2:0 18px 60px rgba(0,0,0,.4);
+  /* motion */
+  --dur-fast:150ms;--dur-base:220ms;--dur-slow:400ms;--ease:cubic-bezier(.2,.7,.2,1);
+  /* z-index */
+  --z-base:0;--z-sticky:40;--z-nav:50;--z-overlay:60;--z-toast:70;
+  /* layout */
+  --container:1200px;--gutter:20px;--header-h:60px;--tap:44px;
+}
+@media(min-width:900px){:root{--gutter:32px;--header-h:72px}}
+
+/* ============ BASE ============ */
+*{box-sizing:border-box}
+html{scroll-behavior:smooth;-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg-page);color:var(--text-primary);font:400 var(--fs-md)/1.55 var(--font-body);-webkit-font-smoothing:antialiased}
+h1,h2,h3,h4,p,ul,ol,figure{margin:0}
+ul,ol{padding:0;list-style:none}
+a{color:inherit}
+button,input,select,textarea{font:inherit;color:inherit}
+button{cursor:pointer}
+img{max-width:100%;display:block}
+::selection{background:var(--accent-500);color:var(--ink-950)}
+:focus-visible{outline:3px solid var(--focus);outline-offset:3px}
+.on-accent :focus-visible,.surface-accent :focus-visible{outline-color:var(--ink-950)}
+.container{width:min(var(--container),100% - 2*var(--gutter));margin-inline:auto}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+
+/* type roles */
+.t-display{font:800 var(--fs-display)/.9 var(--font-display);letter-spacing:-.02em;text-transform:uppercase}
+.t-h1{font:800 var(--fs-h1)/.98 var(--font-display);letter-spacing:-.015em;text-transform:uppercase}
+.t-h2{font:700 var(--fs-h2)/1.02 var(--font-display);letter-spacing:-.01em}
+.t-h3{font:700 var(--fs-h3)/1.05 var(--font-display);letter-spacing:-.005em}
+.t-h4{font:700 var(--fs-h4)/1.1 var(--font-display)}
+.t-display span,.t-h1 span,.t-h2 span,.t-h3 span,.hl{color:var(--accent-500)}
+.t-lead{font:500 var(--fs-lg)/1.55 var(--font-body);color:var(--text-secondary)}
+.t-body{font:400 var(--fs-md)/1.55 var(--font-body)}
+.t-small{font:500 var(--fs-sm)/1.5 var(--font-body)}
+.t-label{font:700 13px/1.2 var(--font-body);letter-spacing:.08em;text-transform:uppercase}
+.t-caption{font:500 var(--fs-xs)/1.4 var(--font-body);color:var(--text-muted)}
+.eyebrow{font:700 13px/1 var(--font-body);letter-spacing:.1em;text-transform:uppercase;color:var(--accent-500)}
+.muted{color:var(--text-muted)}.sec{color:var(--text-secondary)}.yellow{color:var(--accent-500)}
+.code{font:500 12px/1.5 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;color:var(--ink-300)}
+
+/* ============ DOC CHROME ============ */
+.topbar{position:sticky;top:0;z-index:var(--z-nav);background:rgba(8,8,9,.92);backdrop-filter:blur(14px);border-bottom:1px solid var(--border-subtle)}
+.topbar .in{height:var(--header-h);display:flex;align-items:center;gap:20px}
+.wordmark{display:inline-flex;align-items:center;gap:10px;font:800 22px/1 var(--font-display);letter-spacing:.03em;text-transform:uppercase;text-decoration:none;white-space:nowrap}
+.wordmark::before{content:"";width:18px;height:14px;background:var(--accent-grad);clip-path:polygon(28% 0,100% 0,72% 100%,0 100%);flex:none}
+.wordmark i{font-style:normal;color:var(--accent-500)}
+.docnav{display:flex;gap:2px;overflow-x:auto;scrollbar-width:none;margin-left:auto}
+.docnav::-webkit-scrollbar{display:none}
+.docnav a{padding:12px 10px;font:700 12px/1 var(--font-body);letter-spacing:.06em;text-transform:uppercase;text-decoration:none;color:var(--ink-300);white-space:nowrap;min-height:var(--tap);display:flex;align-items:center}
+.docnav a:hover{color:var(--white)}
+.section{padding:var(--sp-10) 0;border-top:1px solid var(--border-subtle);scroll-margin-top:var(--header-h)}
+@media(min-width:900px){.section{padding:var(--sp-12) 0}}
+.sh{display:grid;gap:var(--sp-4);margin-bottom:var(--sp-9)}
+.sh h2{font:700 var(--fs-h2)/1.02 var(--font-display)}
+.sh p{color:var(--text-secondary);max-width:64ch}
+@media(min-width:900px){.sh{grid-template-columns:280px 1fr;gap:var(--sp-9)}}
+.panel{background:var(--bg-surface);border:1px solid var(--border-subtle);border-radius:var(--r-lg);padding:var(--sp-6)}
+.panel h3{font:700 26px/1.1 var(--font-display);margin:10px 0 6px}
+.grid{display:grid;gap:16px}
+@media(min-width:700px){.g2{grid-template-columns:repeat(2,minmax(0,1fr))}.g3{grid-template-columns:repeat(3,minmax(0,1fr))}.g4{grid-template-columns:repeat(4,minmax(0,1fr))}}
+.grid>*,.two>*,.cells>*,.stack>*{min-width:0}
+.stack{display:grid;gap:16px}.row{display:flex;flex-wrap:wrap;gap:12px;align-items:center}
+.note{padding:14px 16px;border-left:3px solid var(--accent-500);background:var(--ink-850);color:var(--text-secondary);font-size:14px;border-radius:0 var(--r-sm) var(--r-sm) 0}
+.note b{color:var(--paper)}
+table.tbl{width:100%;border-collapse:collapse;font-size:14px}
+.tbl th,.tbl td{text-align:left;padding:12px 10px;border-bottom:1px solid var(--border-subtle);vertical-align:top}
+.tbl th{font:700 12px/1 var(--font-body);letter-spacing:.08em;text-transform:uppercase;color:var(--text-muted)}
+.tblwrap{overflow-x:auto}
+pre.snip{margin:0;background:var(--ink-850);border:1px solid var(--border-subtle);border-radius:var(--r-md);padding:16px;overflow-x:auto;font:500 12.5px/1.6 ui-monospace,Consolas,monospace;color:var(--ink-200)}
+
+/* hero of the doc */
+.dochero{padding:var(--sp-10) 0 var(--sp-9);position:relative;overflow:hidden;background:radial-gradient(circle at 85% 10%,rgba(180,242,42,.10),transparent 30%),var(--ink-950)}
+.dochero .container{position:relative;z-index:1}.dochero .t-display{max-width:9ch}
+.dochero p{margin-top:20px;max-width:52ch}
+.metrics{display:grid;gap:16px;margin-top:var(--sp-8);grid-template-columns:1fr}
+@media(min-width:700px){.metrics{grid-template-columns:repeat(3,1fr)}.dochero{padding:var(--sp-12) 0 var(--sp-10)}}
+.metrics div{border-left:2px solid var(--accent-500);padding-left:16px}
+.metrics b{display:block;font:700 22px/1.1 var(--font-display)}
+.metrics span{font-size:13px;color:var(--text-muted)}
+
+/* ============ SWATCHES ============ */
+.swatches{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+@media(min-width:700px){.swatches{grid-template-columns:repeat(4,1fr)}}
+.sw{min-height:132px;padding:14px;border-radius:var(--r-md);display:flex;flex-direction:column;justify-content:space-between;border:1px solid rgba(255,255,255,.1)}
+.sw b{font:700 14px/1.2 var(--font-body)}.sw span{font:500 12px/1.4 ui-monospace,Consolas,monospace;opacity:.85}
+
+/* ============ ELEMENT LIBRARY (aligned spec rows) ============ */
+.lib{border-top:1px solid var(--border-subtle)}
+.spec{display:grid;gap:16px;padding:var(--sp-7) 0;border-bottom:1px solid var(--border-subtle)}
+@media(min-width:900px){.spec{grid-template-columns:240px 1fr;gap:var(--sp-9)}}
+.spec-meta h3{font:700 24px/1.1 var(--font-display)}
+.spec-meta .n{display:block;font:700 12px/1 var(--font-body);letter-spacing:.1em;color:var(--accent-500);margin-bottom:10px}
+.spec-meta p{font-size:13px;color:var(--text-muted);margin-top:8px;max-width:34ch}
+.demo{display:grid;gap:20px;min-width:0}
+.cell{display:grid;gap:10px}
+.cell>.cap{font:700 11px/1 var(--font-body);letter-spacing:.1em;text-transform:uppercase;color:var(--text-muted)}
+.cells{display:grid;gap:20px}
+@media(min-width:600px){.cells.c2{grid-template-columns:repeat(2,minmax(0,1fr))}.cells.c3{grid-template-columns:repeat(3,minmax(0,1fr))}}
+.stage{background:var(--bg-surface);border:1px solid var(--border-subtle);border-radius:var(--r-md);padding:20px;display:flex;flex-wrap:wrap;gap:12px;align-items:center}
+.stage.col{display:grid;align-items:start}
+.stage.accent{background:var(--accent-grad);border-color:transparent;color:var(--ink-950)}
+.stage.paper{background:var(--paper);border-color:transparent;color:var(--ink-950)}
+
+/* ============ COMPONENTS ============ */
+.icon{width:24px;height:24px;flex:none;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.icon.sm{width:20px;height:20px}
+/* buttons */
+.btn{--h:52px;min-height:var(--h);padding:0 22px;border-radius:var(--r-sm);border:1.5px solid transparent;display:inline-flex;align-items:center;justify-content:center;gap:10px;font:700 16px/1.1 var(--font-body);letter-spacing:-.005em;text-decoration:none;white-space:nowrap;transition:background var(--dur-fast) var(--ease),border-color var(--dur-fast) var(--ease),color var(--dur-fast) var(--ease),transform var(--dur-fast) var(--ease);background:none}
+.btn.sm{--h:44px;padding:0 16px;font-size:15px}.btn.lg{--h:60px;padding:0 28px}.btn.block{width:100%}
+.btn.primary{background:var(--accent-500);color:var(--ink-950)}
+.btn.primary:hover,.btn.primary.is-hover{background:var(--accent-400)}
+.btn.primary:active{background:var(--accent-600);transform:translateY(1px)}
+.btn.secondary{border-color:var(--border-control);color:var(--paper)}
+.btn.secondary:hover,.btn.secondary.is-hover{border-color:var(--accent-500);color:var(--accent-500)}
+.btn.ghost{padding-inline:10px;color:var(--ink-200)}.btn.ghost:hover{color:var(--accent-500)}
+.btn.inverse{background:var(--ink-950);color:var(--accent-500)}.btn.inverse:hover{background:#000}
+.btn.icon-only{width:var(--h);padding:0;border-color:var(--border-control)}
+.btn.icon-only:hover{border-color:var(--accent-500);color:var(--accent-500)}
+.btn.is-focus{outline:3px solid var(--focus);outline-offset:3px}
+.btn[disabled],.btn.is-disabled{opacity:.4;cursor:not-allowed;pointer-events:none}
+.btn[aria-busy=true]{pointer-events:none}
+.spin{animation:spin .8s linear infinite}@keyframes spin{to{transform:rotate(360deg)}}
+.tlink{color:var(--accent-500);font-weight:700;text-decoration:underline;text-underline-offset:4px;text-decoration-thickness:1.5px}
+.tlink:hover{color:var(--accent-400)}
+/* fields */
+.field{display:grid;gap:8px}
+.field>label,.field>.lbl{font:700 14px/1.3 var(--font-body)}
+.field .opt{font-weight:500;color:var(--text-muted)}
+.hint{font-size:13px;color:var(--text-muted)}
+.ctl{width:100%;min-height:52px;padding:14px 16px;background:var(--ink-850);border:1.5px solid var(--border-control);border-radius:var(--r-sm);font-size:16px;outline:none;transition:border-color var(--dur-fast),box-shadow var(--dur-fast)}
+.ctl::placeholder{color:#7C7C82}
+textarea.ctl{min-height:132px;resize:vertical}
+.ctl:hover{border-color:#8A8A90}
+.ctl:focus,.ctl.is-focus{border-color:var(--accent-500);box-shadow:0 0 0 3px var(--accent-tint)}
+.field.error .ctl{border-color:var(--danger)}
+.field.success .ctl{border-color:var(--success)}
+.ctl:disabled{opacity:.45;cursor:not-allowed}
+.msg{display:flex;gap:8px;align-items:flex-start;font-size:13px;font-weight:600}
+.msg .icon{width:18px;height:18px;margin-top:1px}
+.field.error .msg{color:var(--danger)}.field.success .msg{color:var(--success)}
+.prefix{display:flex}
+.prefix>span{display:flex;align-items:center;padding:0 14px;min-height:52px;background:var(--ink-800);border:1.5px solid var(--border-control);border-right:0;border-radius:var(--r-sm) 0 0 var(--r-sm);font-weight:700;color:var(--ink-200)}
+.prefix .ctl{border-radius:0 var(--r-sm) var(--r-sm) 0}
+.selectwrap{position:relative}.selectwrap select{appearance:none;padding-right:48px}
+.selectwrap .icon{position:absolute;right:14px;top:14px;pointer-events:none}
+/* chips */
+.chips{display:flex;flex-wrap:wrap;gap:10px}
+.chip{position:relative}
+.chip input{position:absolute;opacity:0;inset:0;width:100%;height:100%;margin:0;cursor:pointer}
+.chip span{display:inline-flex;align-items:center;gap:8px;min-height:var(--tap);padding:0 16px;border-radius:var(--r-pill);border:1.5px solid var(--border-control);font-weight:600;font-size:15px;transition:all var(--dur-fast)}
+.chip span .icon{width:18px;height:18px;display:none}
+.chip:hover span{border-color:var(--accent-500)}
+.chip input:checked+span{background:var(--accent-500);border-color:var(--accent-500);color:var(--ink-950)}
+.chip input:checked+span .icon{display:block}
+.chip input:focus-visible+span{outline:3px solid var(--focus);outline-offset:3px}
+/* checkbox */
+.check{display:flex;gap:12px;align-items:flex-start;cursor:pointer;padding:6px 0;font-size:14px;color:var(--text-secondary);line-height:1.5}
+.check input{appearance:none;flex:none;width:24px;height:24px;margin:1px 0 0;border:1.5px solid var(--border-control);border-radius:7px;background:var(--ink-850);display:grid;place-items:center;cursor:pointer;transition:all var(--dur-fast)}
+.check input:checked{background:var(--accent-500);border-color:var(--accent-500)}
+.check input:checked::after{content:"";width:6px;height:11px;border:solid var(--ink-950);border-width:0 2.5px 2.5px 0;transform:translateY(-1px) rotate(45deg)}
+.check input:focus-visible{outline:3px solid var(--focus);outline-offset:3px}
+/* upload */
+.upload{display:flex;gap:14px;align-items:center;padding:16px;border:1.5px dashed var(--border-control);border-radius:var(--r-md);background:var(--ink-850)}
+.upload .ic{width:44px;height:44px;border-radius:50%;background:var(--ink-700);display:grid;place-items:center;flex:none}
+.upload b{display:block;font-size:15px}.upload small{color:var(--text-muted);font-size:13px}
+.upload.filled{border-style:solid;border-color:var(--border-strong)}
+.upload.bad{border-color:var(--danger)}
+.upload .x{margin-left:auto}
+/* availability */
+.pill{display:inline-flex;align-items:center;gap:10px;min-height:36px;padding:0 14px;border-radius:var(--r-pill);border:1px solid var(--border-strong);background:var(--ink-850);font:600 14px/1 var(--font-body)}
+.pill .dot{width:9px;height:9px;border-radius:50%;background:var(--success);box-shadow:0 0 0 4px rgba(85,214,138,.14)}
+.pill.limited .dot{background:var(--warning);box-shadow:0 0 0 4px rgba(255,181,71,.14)}
+.pill.full .dot{background:transparent;border:2px solid var(--ink-300);box-shadow:none}
+/* badges */
+.badge{display:inline-flex;align-items:center;gap:6px;min-height:28px;padding:0 12px;border-radius:var(--r-pill);border:1px solid var(--border-strong);font:700 12px/1 var(--font-body);letter-spacing:.06em;text-transform:uppercase;color:var(--ink-200)}
+.badge.accent{background:var(--accent-500);border-color:var(--accent-500);color:var(--ink-950)}
+.badge.ok{color:var(--success);border-color:rgba(85,214,138,.4)}.badge.warn{color:var(--warning);border-color:rgba(255,181,71,.4)}.badge.bad{color:var(--danger);border-color:rgba(255,107,111,.4)}
+/* alerts */
+.alert{display:flex;gap:12px;padding:14px 16px;border-radius:var(--r-md);border:1px solid var(--border-strong);background:var(--ink-850)}
+.alert .icon{margin-top:1px}.alert b{display:block;font-size:15px}.alert p{font-size:14px;color:var(--text-secondary);margin-top:2px}
+.alert.ok{border-color:rgba(85,214,138,.45)}.alert.ok>.icon{color:var(--success)}
+.alert.bad{border-color:rgba(255,107,111,.5)}.alert.bad>.icon{color:var(--danger)}
+.alert.info{border-color:rgba(98,182,255,.45)}.alert.info>.icon{color:var(--info)}
+.alert.warn{border-color:rgba(255,181,71,.5)}.alert.warn>.icon{color:var(--warning)}
+/* avatar */
+.avatar{--s:44px;width:var(--s);height:var(--s);border-radius:50%;flex:none;display:grid;place-items:center;overflow:hidden;background:var(--ink-700);color:var(--accent-500);font:800 calc(var(--s)*.34)/1 var(--font-body);letter-spacing:.02em;border:1.5px solid var(--border-strong)}
+.avatar img{width:100%;height:100%;object-fit:cover}
+.avatar.lg{--s:64px}.avatar.sm{--s:32px}
+/* accordion */
+.faq{border-top:1px solid var(--border-strong)}
+.faq details{border-bottom:1px solid var(--border-subtle)}
+.faq summary{list-style:none;cursor:pointer;min-height:60px;padding:16px 0;display:flex;justify-content:space-between;align-items:center;gap:16px;font:600 17px/1.35 var(--font-body)}
+.faq summary::-webkit-details-marker{display:none}
+.faq summary .icon{color:var(--accent-500);transition:transform var(--dur-base) var(--ease)}
+.faq details[open] summary .icon{transform:rotate(45deg)}
+.faq .ans{padding:0 40px 20px 0;color:var(--text-secondary);font-size:15px}
+/* steps */
+.steps{display:grid}
+.step{display:grid;grid-template-columns:48px 1fr;gap:12px;padding:18px 0;border-bottom:1px solid var(--border-subtle)}
+.step:last-child{border-bottom:0}
+.step .no{font:700 14px/1.6 var(--font-body);color:var(--accent-500)}
+.step h4{font:700 22px/1.1 var(--font-display)}.step p{font-size:14px;color:var(--text-secondary);margin-top:4px}
+/* cards */
+.card{background:var(--surface-grad);border:1px solid var(--border-subtle);border-radius:var(--r-lg);padding:24px;display:flex;flex-direction:column;gap:12px}
+.card .kick{font:700 12px/1 var(--font-body);letter-spacing:.1em;text-transform:uppercase;color:var(--accent-500)}
+.card h4{font:700 26px/1.1 var(--font-display)}
+.card p{font-size:15px;color:var(--text-secondary)}
+.card.method{min-height:200px;justify-content:space-between}
+.metric{padding:24px;background:var(--surface-grad);border:1px solid var(--border-subtle);border-radius:var(--r-lg)}
+.metric b{display:block;font:800 clamp(52px,12vw,72px)/.95 var(--font-display);color:var(--accent-500)}
+.metric span{display:block;margin-top:10px;font-size:14px;color:var(--text-secondary)}
+/* testimonial card */
+.tcard{background:var(--surface-grad);border:1px solid var(--border-subtle);border-radius:var(--r-lg);padding:24px;display:flex;flex-direction:column;gap:20px;height:100%}
+.tcard blockquote{margin:0;font:500 18px/1.55 var(--font-body);position:relative}
+.tcard blockquote::before{content:"\201C";display:block;font:800 56px/.6 var(--font-display);color:var(--accent-500);margin-bottom:12px}
+.tcard blockquote.clamp{display:-webkit-box;-webkit-line-clamp:6;-webkit-box-orient:vertical;overflow:hidden}
+.tcard .more{align-self:flex-start;min-height:var(--tap);padding:0;background:none;border:0;color:var(--accent-500);font:700 14px var(--font-body);text-decoration:underline;text-underline-offset:4px;margin-top:-12px}
+.tcard footer{display:flex;gap:12px;align-items:center;margin-top:auto;padding-top:16px;border-top:1px solid var(--border-subtle)}
+.tcard .who b{display:block;font-size:15px;line-height:1.3}.tcard .who small{display:block;font-size:13px;color:var(--text-muted);line-height:1.4}
+/* icon grid */
+.icons{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--border-subtle);border:1px solid var(--border-subtle);border-radius:var(--r-md);overflow:hidden}
+@media(min-width:600px){.icons{grid-template-columns:repeat(6,1fr)}}
+.icons div{background:var(--bg-surface);min-height:104px;display:grid;place-items:center;align-content:center;gap:10px;padding:14px}
+.icons span{font:500 11px/1 ui-monospace,Consolas,monospace;color:var(--ink-400)}
+.icons .icon{width:28px;height:28px}
+
+/* ============ PHONE FRAMES ============ */
+.rail{display:flex;gap:20px;overflow-x:auto;padding:4px 2px 16px;scroll-snap-type:x mandatory}
+@media(min-width:1100px){.rail{flex-wrap:wrap;overflow:visible}}
+.phone{flex:none;width:375px;max-width:calc(100vw - 2*var(--gutter));scroll-snap-align:start;display:grid;gap:10px;align-content:start}
+.phone>.cap{font:700 11px/1 var(--font-body);letter-spacing:.1em;text-transform:uppercase;color:var(--text-muted)}
+.screen{position:relative;border:1px solid var(--border-strong);border-radius:28px;overflow:hidden;background:var(--bg-page);min-height:560px;display:flex;flex-direction:column}
+.mhead{height:60px;padding:0 16px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border-subtle);background:rgba(8,8,9,.95);flex:none}
+.mbody{padding:24px 20px;display:grid;gap:20px;align-content:start;flex:1}
+.mbar{position:sticky;bottom:0;margin-top:auto;padding:12px 16px calc(12px + env(safe-area-inset-bottom));display:flex;gap:10px;background:rgba(13,13,15,.96);border-top:1px solid var(--border-strong);backdrop-filter:blur(12px)}
+.mbar .btn:first-child{flex:1}
+.menu{display:grid;gap:0;margin-top:8px}
+.menu a{display:flex;justify-content:space-between;align-items:center;min-height:64px;border-bottom:1px solid var(--border-subtle);font:800 32px/1 var(--font-display);text-transform:uppercase;text-decoration:none}
+.menu a[aria-current=page]{color:var(--accent-500)}
+.proof{display:grid;grid-template-columns:repeat(3,1fr);border-top:1px solid var(--border-subtle);border-bottom:1px solid var(--border-subtle)}
+.proof div{padding:14px 8px 14px 0}
+.proof div+div{padding-left:12px;border-left:1px solid var(--border-subtle)}
+.proof b{display:block;font:800 30px/1 var(--font-display);color:var(--accent-500)}
+.proof span{font-size:12px;color:var(--text-secondary);line-height:1.3;display:block;margin-top:4px}
+/* motifs */
+.slashes{display:grid;grid-template-rows:repeat(3,1fr);gap:7%;width:min(46vw,420px);aspect-ratio:1.1;pointer-events:none}
+.slashes i{display:block;background:var(--accent-grad);clip-path:polygon(26% 0,100% 0,74% 100%,0 100%)}
+.slashes i:nth-child(1),.slashes i:nth-child(3){margin-left:30%}
+.slashes.dark i{background:var(--ink-950)}
+.slashes.corner{position:absolute;top:8px;right:-24px;width:96px}
+.trace{position:absolute;pointer-events:none;width:min(70%,420px);aspect-ratio:420/110;background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 420 110'%3E%3Cpath d='M-4 12H80L128 96 176 12H256L304 96 352 12H424' fill='none' stroke='%23B4F22A' stroke-width='2.5' stroke-linejoin='round' stroke-linecap='round'/%3E%3C/svg%3E") no-repeat center/100% 100%}
+.slashlist li{display:flex;gap:12px;align-items:center;min-height:44px}
+.slashlist li::before{content:"";width:16px;height:12px;flex:none;background:var(--accent-grad);clip-path:polygon(28% 0,100% 0,72% 100%,0 100%)}
+.dochero .slashes{position:absolute;right:-30px;top:36px;width:104px}
+.pat-hero .slashes{position:absolute;right:-24px;top:16px;width:96px}
+@media(min-width:900px){.dochero .slashes{right:-2%;top:14%;width:min(34vw,420px)}.pat-hero .slashes{right:-3%;top:10%;width:min(36%,360px)}}
+
+/* ============ SECTION PATTERNS ============ */
+.pat{border:1px solid var(--border-subtle);border-radius:var(--r-xl);overflow:hidden;background:var(--bg-surface)}
+.pat+.pat{margin-top:20px}
+.pat .tag{padding:12px 20px;border-bottom:1px solid var(--border-subtle);display:flex;justify-content:space-between;gap:12px;background:var(--ink-850)}
+.pat .body{padding:var(--sp-8) var(--sp-6)}
+@media(min-width:900px){.pat .body{padding:var(--sp-10) var(--sp-9)}}
+.two{display:grid;gap:32px}
+@media(min-width:800px){.two{grid-template-columns:1fr 1fr;align-items:start}}
+.fitlist{display:grid;gap:0}
+.fitlist li{display:flex;gap:14px;align-items:center;min-height:56px;padding:12px 0;border-bottom:1px solid var(--border-subtle);font-weight:600}
+.fitlist .icon{color:var(--accent-500)}
+.surface-accent{background:var(--accent-grad);color:var(--ink-950)}
+.surface-accent p{color:#1C2600}
+.foot{display:grid;gap:24px}
+@media(min-width:700px){.foot{grid-template-columns:1.2fr 1fr;align-items:end}}
+.foot a{display:flex;align-items:center;gap:12px;min-height:var(--tap);text-decoration:none;font-weight:600}
+.foot a:hover{color:var(--accent-500)}
+
+/* ============ IMAGERY / OFF-SITE ============ */
+.frame{position:relative;background:linear-gradient(160deg,var(--ink-700),var(--ink-850));border:1px solid var(--border-strong);border-radius:var(--r-md);display:grid;place-items:center;color:var(--ink-400);font:700 12px var(--font-body);letter-spacing:.08em;text-transform:uppercase;overflow:hidden}
+.frame::after{content:"";position:absolute;inset:0;background:linear-gradient(0deg,rgba(8,8,9,.5),transparent 45%);pointer-events:none}
+.frame span{position:relative;z-index:1;text-align:center;padding:12px}
+.ar-45{aspect-ratio:4/5}.ar-32{aspect-ratio:3/2}.ar-11{aspect-ratio:1}.ar-169{aspect-ratio:16/9}
+.poster,.bcard,.og,.mgate{position:relative;overflow:hidden;container-type:inline-size;border:1px solid var(--border-strong);border-radius:var(--r-md)}
+.poster{aspect-ratio:3/4;background:var(--surface-grad);padding:8%;display:flex;flex-direction:column;justify-content:flex-start}
+.poster>*{position:relative}
+.poster>.slashes{position:absolute;right:-14%;top:5%;width:58%}
+.poster h4{font:800 clamp(26px,13cqw,60px)/.95 var(--font-display);text-transform:uppercase;letter-spacing:-.01em;max-width:9ch;margin-top:auto;margin-bottom:8%}
+.poster h4 b{font-weight:800;color:var(--accent-500)}
+.qr{background:var(--paper);padding:8px;border-radius:10px;width:34%;aspect-ratio:1;display:block;flex:none}
+.qr svg{width:100%;height:100%;display:block}
+.bcard{aspect-ratio:7/4;background:var(--surface-grad);border-radius:12px}
+.bcard.front{display:grid;place-items:center}
+.bcard .wm{display:flex;align-items:center;gap:3cqw;font:800 clamp(16px,8cqw,30px)/1 var(--font-display);letter-spacing:.03em;text-transform:uppercase}
+.bcard .wm::before{content:"";width:9cqw;height:7cqw;background:var(--accent-grad);clip-path:polygon(28% 0,100% 0,72% 100%,0 100%)}
+.bcard .wm i{font-style:normal;color:var(--accent-500)}
+.bcard .who{position:absolute;left:6%;bottom:9%;display:grid;gap:1.5cqw}
+.bcard .who b{font:700 clamp(14px,6cqw,22px)/1.1 var(--font-display);letter-spacing:.03em;text-transform:uppercase}
+.bcard .who small{font-size:clamp(10px,3.4cqw,13px);color:var(--ink-300)}
+.mgate{aspect-ratio:1;background:var(--accent-grad);color:var(--ink-950);padding:8%;display:flex;flex-direction:column;justify-content:flex-start;border-color:transparent}
+.mgate>*{position:relative}
+.mgate>.slashes{position:absolute;right:-10%;top:4%;width:42%}
+.mgate h4{font:800 clamp(30px,15cqw,68px)/.92 var(--font-display);text-transform:uppercase;letter-spacing:-.01em;max-width:8ch;margin-top:auto;margin-bottom:6%}
+.mgate h4 b{font-weight:800}
+.og{aspect-ratio:1200/630;background:var(--surface-grad);padding:6%;display:flex;flex-direction:column;justify-content:space-between}
+.og>*{position:relative}
+.og>.slashes{position:absolute;right:-6%;top:12%;width:44%}
+.og h4{font:800 clamp(28px,10cqw,64px)/.95 var(--font-display);text-transform:uppercase;letter-spacing:-.01em;max-width:10ch}
+.og h4 b{font-weight:800;color:var(--accent-500)}
+
+/* motion demo */
+.mo{height:88px;border:1px solid var(--border-subtle);border-radius:var(--r-md);background:var(--ink-850);display:grid;align-items:center;padding:0 24px}
+.mo i{display:block;width:14px;height:14px;border-radius:50%;background:var(--accent-500);animation:slide 1.6s var(--ease) infinite alternate}
+@keyframes slide{to{transform:translateX(min(60vw,420px))}}
+.do,.dont{padding:20px;border-radius:var(--r-md);border:1px solid var(--border-subtle)}
+.do{border-color:rgba(85,214,138,.4)}.dont{border-color:rgba(255,107,111,.4)}
+.do>b{color:var(--success)}.dont>b{color:var(--danger)}
+.do p,.dont p{margin-top:8px;font-size:14px;color:var(--text-secondary)}
+.footer{padding:var(--sp-9) 0 var(--sp-11);border-top:1px solid var(--border-subtle);color:var(--text-muted);font-size:13px}
+@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}*,*::before,*::after{animation-duration:.001ms!important;animation-iteration-count:1!important;transition-duration:.001ms!important}}
+</style>
+</head>
+<body>
+
+<!-- ICON SPRITE -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+<defs>
+<symbol id="i-arrow-right" viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></symbol>
+<symbol id="i-arrow-left" viewBox="0 0 24 24"><path d="M19 12H5M11 6l-6 6 6 6"/></symbol>
+<symbol id="i-arrow-down" viewBox="0 0 24 24"><path d="M12 5v14M6 13l6 6 6-6"/></symbol>
+<symbol id="i-chevron-down" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></symbol>
+<symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+<symbol id="i-minus" viewBox="0 0 24 24"><path d="M5 12h14"/></symbol>
+<symbol id="i-close" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></symbol>
+<symbol id="i-check" viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7"/></symbol>
+<symbol id="i-check-circle" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M8 12.5l3 3 5-6"/></symbol>
+<symbol id="i-alert" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7.5v5.5M12 16.5h.01"/></symbol>
+<symbol id="i-info" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 11v5.5M12 7.5h.01"/></symbol>
+<symbol id="i-menu" viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h10"/></symbol>
+<symbol id="i-whatsapp" viewBox="0 0 24 24"><path d="M3.5 20.5l1.3-4.3A8.5 8.5 0 1 1 8 19.2z"/><path d="M9 8.6c0 3.4 3 6.4 6.4 6.4l1-1.5-2-1-1 .8c-1-.5-1.9-1.4-2.4-2.4l.8-1-1-2z"/></symbol>
+<symbol id="i-phone" viewBox="0 0 24 24"><path d="M6 3h3l2 5-2.5 1.5a11 11 0 0 0 6 6L16 13l5 2v3a3 3 0 0 1-3 3A15 15 0 0 1 3 6a3 3 0 0 1 3-3z"/></symbol>
+<symbol id="i-mail" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/></symbol>
+<symbol id="i-location" viewBox="0 0 24 24"><path d="M12 21s7-6 7-11.5A7 7 0 0 0 5 9.5C5 15 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/></symbol>
+<symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></symbol>
+<symbol id="i-calendar" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></symbol>
+<symbol id="i-upload" viewBox="0 0 24 24"><path d="M12 16V4M7 9l5-5 5 5M4 20h16"/></symbol>
+<symbol id="i-user" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 3.5-6 8-6s8 2 8 6"/></symbol>
+<symbol id="i-strength" viewBox="0 0 24 24"><path d="M6 8v8M3 10v4M18 8v8M21 10v4M6 12h12"/></symbol>
+<symbol id="i-stamina" viewBox="0 0 24 24"><path d="M3 12h4l2-6 4 12 2-6h6"/></symbol>
+<symbol id="i-mobility" viewBox="0 0 24 24"><path d="M20 8a8 8 0 0 0-14-2M4 4v4h4M4 16a8 8 0 0 0 14 2M20 20v-4h-4"/></symbol>
+<symbol id="i-progress" viewBox="0 0 24 24"><path d="M3 17l6-6 4 4 8-8M15 7h6v6"/></symbol>
+<symbol id="i-external" viewBox="0 0 24 24"><path d="M14 4h6v6M20 4l-9 9M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/></symbol>
+<symbol id="i-spinner" viewBox="0 0 24 24"><path d="M12 3a9 9 0 1 0 9 9"/></symbol>
+</defs>
+</svg>
+
+<header class="topbar">
+  <div class="container in">
+    <a class="wordmark" href="#top">Akhil <i>Fitness</i></a>
+    <nav class="docnav" aria-label="Design system sections">
+      <a href="#color">Color</a><a href="#type">Type</a><a href="#tokens">Tokens</a><a href="#elements">Elements</a><a href="#icons">Icons</a><a href="#cards">Cards</a><a href="#mobile">Mobile</a><a href="#patterns">Sections</a><a href="#imagery">Imagery</a><a href="#offsite">Off-site</a><a href="#rules">Rules</a>
+    </nav>
+  </div>
+</header>
+
+<main id="top">
+<!-- ================= OVERVIEW ================= -->
+<section class="dochero">
+  <div class="slashes" aria-hidden="true"><i></i><i></i><i></i></div>
+  <div class="container">
+    <div class="eyebrow">Design System V5.1 · Mobile first · 375px</div>
+    <h1 class="t-display" style="margin-top:20px">Build <span>fitness</span> that lasts.</h1>
+    <p class="t-lead">Charcoal-to-black surfaces, one lime-yellow signal, angled slash shapes, thin trace lines and condensed athletic type. Built for a three-page trust-and-trial site that people reach by scanning a QR code on their phone.</p>
+    <div class="metrics">
+      <div><b>Trust → action</b><span>Every component supports credibility, fit or the free trial.</span></div>
+      <div><b>Two typefaces</b><span>Barlow Condensed + Manrope. About six font files, fast first paint.</span></div>
+      <div><b>Logo TBD</b><span>Text wordmark only. Logo is designed against this system, not before it.</span></div>
+    </div>
+  </div>
+</section>
+
+<section class="section" id="changes">
+  <div class="container">
+    <div class="sh"><div><div class="eyebrow">00 / What changed</div><h2>V4 → V5</h2></div><p>V5 fixes the defects found in the V4 review and adds the components the PRD (v1.1) needs on a phone.</p></div>
+    <div class="tblwrap"><table class="tbl">
+      <tr><th>Area</th><th>V4 problem</th><th>V5.1 fix</th></tr>
+      <tr><td><b>Look &amp; feel</b></td><td>Thin diagonal stripes and a flat black field read as generic gym.</td><td>Reference-led: lime-yellow signal, charcoal gradient surfaces, angled slash shapes and one thin trace line. Typography is unchanged from V5.</td></tr>
+      <tr><td><b>Accent</b></td><td>Token was lime #D7FF00, swatch was yellow #E8E100.</td><td>One accent: <b>Signal #B4F22A</b> (lime-yellow, sampled from the reference images), with hover, pressed and tint steps.</td></tr>
+      <tr><td><b>Accent on accent</b></td><td>Yellow button on a yellow panel disappeared.</td><td>New <b>inverse</b> button and an ink focus ring on yellow surfaces.</td></tr>
+      <tr><td><b>Contrast</b></td><td>Muted text and placeholders were 3.6–3.9:1; control borders were 1.6:1.</td><td>Muted text 5.7:1, placeholder 4.6:1, control border 3.7:1 (WCAG 1.4.11).</td></tr>
+      <tr><td><b>Type</b></td><td>4 families (~19 files); 11–12px labels; uppercase for long headings and questions.</td><td>2 families; 14px minimum for labels and hints; uppercase only for display/H1.</td></tr>
+      <tr><td><b>Touch</b></td><td>40px small button, 18px checkbox.</td><td>44px minimum everywhere; 24px checkbox inside a full-row label.</td></tr>
+      <tr><td><b>Mobile</b></td><td>Desktop-first CSS; no mobile nav; no sticky CTA.</td><td>Mobile-first tokens; header, menu, sticky CTA bar and hero proof strip specified at 375px.</td></tr>
+      <tr><td><b>Forms</b></td><td>Select for goal; no phone prefix, upload, chips or state components.</td><td>Chips, +91 phone field, photo upload, consent checkbox, and full form state set.</td></tr>
+      <tr><td><b>Testimonials</b></td><td>Initials avatar only; no photo rule; no long-quote rule.</td><td>Initials avatar by default; an uploaded photo replaces it. Clamp + “Read more”.</td></tr>
+      <tr><td><b>Availability</b></td><td>“Currently full” used error red.</td><td>Neutral hollow dot plus a waitlist CTA.</td></tr>
+      <tr><td><b>Missing</b></td><td>No WhatsApp icon, footer, fit list, 404, imagery or off-site kit.</td><td>All added.</td></tr>
+    </table></div>
+  </div>
+</section>
+
+<!-- ================= COLOR ================= -->
+<section class="section" id="color">
+  <div class="container">
+    <div class="sh"><div><div class="eyebrow">01 / Foundations</div><h2>Color</h2></div><p>The lime-yellow is a signal: it marks the action, progress or a key number against a charcoal-black field. Solid for text and buttons; the gradient lives only inside slash shapes and one panel. It is never a wallpaper. Semantic colors are reserved for feedback and status.</p></div>
+    <div class="swatches">
+      <div class="sw" style="background:#080809"><b>Ink 950</b><span>#080809<br>page</span></div>
+      <div class="sw" style="background:#0D0D0F"><b>Ink 900</b><span>#0D0D0F<br>surface</span></div>
+      <div class="sw" style="background:#171719"><b>Ink 800</b><span>#171719<br>elevated</span></div>
+      <div class="sw" style="background:#303034"><b>Ink 600</b><span>#303034<br>divider</span></div>
+      <div class="sw" style="background:#6B6B70"><b>Control border</b><span>#6B6B70<br>3.7:1 on fields</span></div>
+      <div class="sw" style="background:#8A8A90;color:#080809"><b>Ink 400</b><span>#8A8A90<br>muted text</span></div>
+      <div class="sw" style="background:#A8A8AD;color:#080809"><b>Ink 300</b><span>#A8A8AD<br>secondary</span></div>
+      <div class="sw" style="background:#C9C9CC;color:#080809"><b>Ink 200</b><span>#C9C9CC<br>body strong</span></div>
+      <div class="sw" style="background:#F5F5F1;color:#080809"><b>Paper</b><span>#F5F5F1<br>text / light surface</span></div>
+      <div class="sw" style="background:#B4F22A;color:#080809"><b>Signal 500</b><span>#B4F22A<br>accent</span></div>
+      <div class="sw" style="background:#C6F55A;color:#080809"><b>Signal 400</b><span>#C6F55A<br>hover / focus</span></div>
+      <div class="sw" style="background:#94CC17;color:#080809"><b>Signal 600</b><span>#94CC17<br>pressed</span></div>
+      <div class="sw" style="background:var(--accent-grad);color:#080809"><b>Signal gradient</b><span>#C9F53B → #8FC300<br>shapes and panels only</span></div>
+      <div class="sw" style="background:var(--surface-grad)"><b>Card gradient</b><span>#202023 → #0C0C0D<br>card surfaces</span></div>
+      <div class="sw" style="background:#222225"><b>Ink 700</b><span>#222225<br>inputs, tracks</span></div>
+      <div class="sw" style="background:#454549"><b>Ink 500</b><span>#454549<br>strong border</span></div>
+    </div>
+    <div class="grid g2" style="margin-top:20px">
+      <div class="panel"><div class="eyebrow">Contrast (measured)</div>
+        <div class="tblwrap"><table class="tbl" style="margin-top:8px">
+          <tr><th>Pair</th><th>Ratio</th><th>Use</th></tr>
+          <tr><td>Paper on Ink 950</td><td>18.3:1</td><td>Body, headings</td></tr>
+          <tr><td>Ink 200 on Ink 950</td><td>12.1:1</td><td>Secondary text</td></tr>
+          <tr><td>Ink 400 on Ink 900</td><td>5.7:1</td><td>Hints, meta</td></tr>
+          <tr><td>Placeholder on field</td><td>4.6:1</td><td>Placeholders</td></tr>
+          <tr><td>Signal on Ink 950</td><td>14.9:1</td><td>CTA, numbers</td></tr>
+          <tr><td>Ink 950 on Signal</td><td>14.9:1</td><td>Button text</td></tr>
+          <tr><td>Ink 400 on card gradient (lightest)</td><td>4.7:1</td><td>Meta on cards</td></tr>
+          <tr><td>Signal on Paper</td><td class="yellow">1.2:1</td><td><b>Never</b> pair these</td></tr>
+        </table></div></div>
+      <div class="panel"><div class="eyebrow">Semantic colors</div>
+        <div class="row" style="margin-top:16px"><span class="badge ok">Success #55D68A</span><span class="badge warn">Warning #FFB547</span><span class="badge bad">Error #FF6B6F</span><span class="badge" style="color:var(--info);border-color:rgba(98,182,255,.4)">Info #62B6FF</span></div>
+        <div class="note" style="margin-top:16px"><b>Never color alone.</b> Every state pairs color with an icon and text. Availability “Currently full” is neutral (hollow dot), not red, because it is a fact, not an error.</div>
+        <div class="note" style="margin-top:12px"><b>On a signal surface</b> use Ink 950 text, the <em>inverse</em> button, and an Ink focus ring.</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= TYPE ================= -->
+<section class="section" id="type">
+  <div class="container">
+    <div class="sh"><div><div class="eyebrow">02 / Typography</div><h2>Two typefaces</h2></div><p>Barlow Condensed gives the athletic voice. Manrope carries everything you read or tap. Labels and nav are Manrope in caps, so no third family is needed.</p></div>
+    <div class="panel" style="padding:0 24px">
+      <div class="spec" style="padding:24px 0"><div class="spec-meta"><h3>Display</h3><p class="code">Barlow Condensed 800<br>48→120 fluid · LH .9 · caps</p></div><div class="t-display">Don’t just get fit.</div></div>
+      <div class="spec" style="padding:24px 0"><div class="spec-meta"><h3>H1</h3><p class="code">Barlow Condensed 800<br>40→64 fluid · caps</p></div><div class="t-h1">Learn how to stay fit.</div></div>
+      <div class="spec" style="padding:24px 0"><div class="spec-meta"><h3>H2</h3><p class="code">Barlow Condensed 700<br>34→48 · sentence case</p></div><div class="t-h2">Fitness shouldn’t be something you keep starting over.</div></div>
+      <div class="spec" style="padding:24px 0"><div class="spec-meta"><h3>H3</h3><p class="code">Barlow Condensed 700<br>28→36 · sentence case</p></div><div class="t-h3">More than a workout.</div></div>
+      <div class="spec" style="padding:24px 0"><div class="spec-meta"><h3>H4</h3><p class="code">Barlow Condensed 700 · 24</p></div><div class="t-h4">Personalised training</div></div>
+      <div class="spec" style="padding:24px 0"><div class="spec-meta"><h3>Lead</h3><p class="code">Manrope 500 · 18 / 1.55</p></div><p class="t-lead">Personalised, hands-on coaching built around your goals, your starting point and your life.</p></div>
+      <div class="spec" style="padding:24px 0"><div class="spec-meta"><h3>Body</h3><p class="code">Manrope 400 · 16 / 1.55<br>max 68ch</p></div><p class="t-body">Getting fit is one thing. Building habits you can keep is another.</p></div>
+      <div class="spec" style="padding:24px 0"><div class="spec-meta"><h3>Small</h3><p class="code">Manrope 500 · 14</p></div><p class="t-small">Form hints, card text and metadata.</p></div>
+      <div class="spec" style="padding:24px 0"><div class="spec-meta"><h3>Label</h3><p class="code">Manrope 700 · 13 · caps +8%</p></div><div class="t-label">Personal training</div></div>
+      <div class="spec" style="padding:24px 0;border:0"><div class="spec-meta"><h3>Caption</h3><p class="code">Manrope 500 · 12 (minimum)</p></div><div class="t-caption">Legal, timestamps and decorative metadata only.</div></div>
+    </div>
+    <div class="grid g3" style="margin-top:20px">
+      <div class="panel"><div class="eyebrow">Case rule</div><p class="sec" style="margin-top:10px;font-size:15px">Uppercase is for <b>Display and H1 only, 8 words or fewer</b>. Longer headings, FAQ questions and body use sentence case.</p></div>
+      <div class="panel"><div class="eyebrow">Minimums</div><p class="sec" style="margin-top:10px;font-size:15px">Body 16px. Labels and hints 14px. 12px is for non-essential metadata. Inputs are 16px so iOS doesn’t zoom.</p></div>
+      <div class="panel"><div class="eyebrow">Font loading</div><p class="sec" style="margin-top:10px;font-size:15px">Self-host, Latin subset, <span class="code">font-display: swap</span>, preload Barlow 800 and Manrope 400/700. About 6 files instead of 19.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= TOKENS ================= -->
+<section class="section" id="tokens">
+  <div class="container">
+    <div class="sh"><div><div class="eyebrow">03 / Layout & tokens</div><h2>Rhythm & structure</h2></div><p>Mobile-first: base styles are 375px, and larger screens add with <span class="code">min-width</span> queries.</p></div>
+    <div class="grid g2">
+      <div class="panel"><div class="eyebrow">Spacing (4px base)</div><div class="tblwrap"><table class="tbl" style="margin-top:8px"><tr><th>Token</th><th>px</th><th>Use</th></tr>
+        <tr><td>sp-2</td><td>8</td><td>Inside controls</td></tr><tr><td>sp-3</td><td>12</td><td>Label ↔ field</td></tr><tr><td>sp-4</td><td>16</td><td>Compact gap</td></tr><tr><td>sp-6</td><td>24</td><td>Card padding</td></tr><tr><td>sp-7</td><td>32</td><td>Grid gap</td></tr><tr><td>sp-10</td><td>64</td><td>Section, mobile</td></tr><tr><td>sp-12</td><td>96</td><td>Section, desktop</td></tr></table></div></div>
+      <div class="panel"><div class="eyebrow">Breakpoints</div><div class="tblwrap"><table class="tbl" style="margin-top:8px"><tr><th>Name</th><th>Min</th><th>Behaviour</th></tr>
+        <tr><td>base</td><td>0</td><td>1 column · 20px gutter · header 60px</td></tr><tr><td>sm</td><td>600</td><td>2-up where useful</td></tr><tr><td>md</td><td>900</td><td>Desktop nav · 32px gutter · header 72px</td></tr><tr><td>lg</td><td>1200</td><td>Container max 1200px</td></tr></table></div>
+        <p class="t-caption" style="margin-top:12px">Content measure 60–68ch · desktop grid 12 col / 24px gutter.</p></div>
+    </div>
+    <div class="grid g3" style="margin-top:16px">
+      <div class="panel"><div class="eyebrow">Radius</div><div class="row" style="margin-top:14px">
+        <div class="frame" style="width:64px;height:48px;border-radius:6px"><span style="padding:0">6</span></div><div class="frame" style="width:64px;height:48px;border-radius:10px"><span style="padding:0">10</span></div><div class="frame" style="width:64px;height:48px;border-radius:14px"><span style="padding:0">14</span></div><div class="frame" style="width:64px;height:48px;border-radius:20px"><span style="padding:0">20</span></div><div class="frame" style="width:64px;height:48px;border-radius:999px"><span style="padding:0">pill</span></div></div>
+        <p class="t-caption" style="margin-top:12px">Controls 10 · cards 20 · chips/pills full.</p></div>
+      <div class="panel"><div class="eyebrow">Motion</div><div class="tblwrap"><table class="tbl" style="margin-top:8px"><tr><td>fast</td><td>150ms</td><td>Controls</td></tr><tr><td>base</td><td>220ms</td><td>Accordion, menu</td></tr><tr><td>slow</td><td>400ms</td><td>Section reveal</td></tr><tr><td>ease</td><td colspan="2" class="code">.2,.7,.2,1</td></tr></table></div></div>
+      <div class="panel"><div class="eyebrow">Z-index</div><div class="tblwrap"><table class="tbl" style="margin-top:8px"><tr><td>sticky bar</td><td>40</td></tr><tr><td>header</td><td>50</td></tr><tr><td>menu overlay</td><td>60</td></tr><tr><td>toast</td><td>70</td></tr></table></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= ELEMENT LIBRARY ================= -->
+<section class="section" id="elements">
+  <div class="container">
+    <div class="sh"><div><div class="eyebrow">04 / Element library</div><h2>Controls that convert.</h2></div><p>Every element sits in the same row: name and usage on the left, live variants on the right, spec line underneath. Minimum tap target is 44px.</p></div>
+    <div class="lib">
+
+      <!-- BUTTONS -->
+      <div class="spec"><div class="spec-meta"><span class="n">4.1</span><h3>Buttons</h3><p>One primary per context. WhatsApp is the secondary. Sentence case, verb + object.</p></div>
+        <div class="demo">
+          <div class="cell"><div class="cap">Variants</div><div class="stage">
+            <button class="btn primary">Book a free trial <svg class="icon sm"><use href="#i-arrow-right"/></svg></button>
+            <button class="btn secondary"><svg class="icon sm"><use href="#i-whatsapp"/></svg> Chat on WhatsApp</button>
+            <button class="btn ghost">Learn more <svg class="icon sm"><use href="#i-arrow-right"/></svg></button>
+            <button class="btn secondary icon-only" aria-label="Next"><svg class="icon"><use href="#i-arrow-right"/></svg></button>
+          </div></div>
+          <div class="cell"><div class="cap">Inverse (on signal)</div><div class="stage accent on-accent"><button class="btn inverse">Book a free trial <svg class="icon sm"><use href="#i-arrow-right"/></svg></button><button class="btn ghost" style="color:var(--ink-950)">Ask a question first</button></div></div>
+          <div class="cell"><div class="cap">Sizes (44 · 52 · 60)</div><div class="stage"><button class="btn primary sm">Small</button><button class="btn primary">Default</button><button class="btn primary lg">Large</button></div></div>
+          <div class="cell"><div class="cap">States</div><div class="stage">
+            <button class="btn primary">Default</button><button class="btn primary is-hover">Hover</button><button class="btn primary is-focus">Focus</button>
+            <button class="btn primary" aria-busy="true"><svg class="icon sm spin"><use href="#i-spinner"/></svg> Sending…</button><button class="btn primary" disabled>Disabled</button>
+          </div></div>
+          <p class="code">h 44/52/60 · r 10 · pad 0 22 · Manrope 700 16 · icon 20 · gap 10</p>
+        </div></div>
+
+      <!-- TEXT FIELDS -->
+      <div class="spec"><div class="spec-meta"><span class="n">4.2</span><h3>Text fields</h3><p>Visible label above. Placeholder shows an example only. Errors sit under the field and never clear other values.</p></div>
+        <div class="demo"><div class="cells c2">
+          <div class="cell"><div class="cap">Default</div><div class="field"><label for="f1">Name</label><input id="f1" class="ctl" placeholder="Your name" autocomplete="name"></div></div>
+          <div class="cell"><div class="cap">Focus</div><div class="field"><label for="f2">Apartment / Society</label><input id="f2" class="ctl is-focus" value="SJR Bluewaters"></div></div>
+          <div class="cell"><div class="cap">Error</div><div class="field error"><label for="f3">WhatsApp number</label><div class="prefix"><span>+91</span><input id="f3" class="ctl" inputmode="numeric" value="98765 4321" aria-invalid="true"></div><div class="msg"><svg class="icon"><use href="#i-alert"/></svg>Enter a 10-digit mobile number.</div></div></div>
+          <div class="cell"><div class="cap">Valid</div><div class="field success"><label for="f4">WhatsApp number</label><div class="prefix"><span>+91</span><input id="f4" class="ctl" inputmode="numeric" value="98765 43210"></div><div class="msg"><svg class="icon"><use href="#i-check-circle"/></svg>Looks good</div></div></div>
+          <div class="cell"><div class="cap">With hint + optional</div><div class="field"><label for="f5">Occupation <span class="opt">(optional)</span></label><input id="f5" class="ctl" placeholder="e.g. Software engineer"><span class="hint">Shown next to your name if you agree below.</span></div></div>
+          <div class="cell"><div class="cap">Disabled</div><div class="field"><label for="f6">Name</label><input id="f6" class="ctl" value="Locked while sending" disabled></div></div>
+        </div>
+        <div class="cell"><div class="cap">Regular training time (free text)</div><div class="field"><label for="f7">If you start training with Akhil, what time would be ideal for your regular workouts?</label><input id="f7" class="ctl" placeholder="e.g. Weekday mornings around 8 AM"></div></div>
+        <p class="code">h 52 · r 10 · border 1.5 #6B6B70 · focus border yellow + 3px tint · text 16</p></div></div>
+
+      <!-- SELECT / TEXTAREA -->
+      <div class="spec"><div class="spec-meta"><span class="n">4.3</span><h3>Select & textarea</h3><p>Select is a fallback when chips won’t fit. Textarea is for open answers only.</p></div>
+        <div class="demo"><div class="cells c2">
+          <div class="cell"><div class="cap">Select</div><div class="field"><label for="s1">Main fitness goal</label><div class="selectwrap"><select id="s1" class="ctl"><option>Select your main goal</option><option>Weight loss</option><option>Strength</option><option>Stamina</option></select><svg class="icon"><use href="#i-chevron-down"/></svg></div></div></div>
+          <div class="cell"><div class="cap">Textarea (required)</div><div class="field"><label for="t1">Your experience</label><textarea id="t1" class="ctl" placeholder="Tell us about your experience training with Akhil."></textarea><span class="hint">A few sentences is plenty.</span></div></div>
+        </div></div></div>
+
+      <!-- CHIPS -->
+      <div class="spec"><div class="spec-meta"><span class="n">4.4</span><h3>Goal chips</h3><p>The compact selector the PRD asks for. Single choice, includes “Other”. Selected state shows a check, not only color.</p></div>
+        <div class="demo"><div class="stage col"><div class="field"><span class="lbl" id="goal-l">What would you most like to work on?</span>
+          <div class="chips" role="radiogroup" aria-labelledby="goal-l" id="goalchips">
+            <label class="chip"><input type="radio" name="goal"><span><svg class="icon"><use href="#i-check"/></svg>Weight loss</span></label>
+            <label class="chip"><input type="radio" name="goal" checked><span><svg class="icon"><use href="#i-check"/></svg>Strength</span></label>
+            <label class="chip"><input type="radio" name="goal"><span><svg class="icon"><use href="#i-check"/></svg>Stamina</span></label>
+            <label class="chip"><input type="radio" name="goal"><span><svg class="icon"><use href="#i-check"/></svg>Mobility</span></label>
+            <label class="chip"><input type="radio" name="goal"><span><svg class="icon"><use href="#i-check"/></svg>General fitness</span></label>
+            <label class="chip"><input type="radio" name="goal"><span><svg class="icon"><use href="#i-check"/></svg>Other</span></label>
+          </div></div></div>
+          <p class="code">h 44 · pill · pad 0 16 · gap 10 · selected = yellow fill + check</p></div></div>
+
+      <!-- CONSENT + UPLOAD -->
+      <div class="spec"><div class="spec-meta"><span class="n">4.5</span><h3>Consent & photo upload</h3><p>The whole row is tappable. Consent wording names exactly what becomes public (PRD 48.14). Photo is optional; an uploaded photo replaces the initials avatar.</p></div>
+        <div class="demo"><div class="cells c2">
+          <div class="cell"><div class="cap">Consent (required)</div><div class="stage col"><label class="check"><input type="checkbox"><span>I agree for this testimonial to be displayed publicly on the Akhil Fitness website with my name, society and photo (if I add one).</span></label></div></div>
+          <div class="cell"><div class="cap">Consent (checked)</div><div class="stage col"><label class="check"><input type="checkbox" checked><span>I agree for this testimonial to be displayed publicly on the Akhil Fitness website with my name, society and photo (if I add one).</span></label></div></div>
+          <div class="cell"><div class="cap">Upload · empty</div><div class="upload"><div class="ic"><svg class="icon"><use href="#i-upload"/></svg></div><div><b>Add a photo <span class="muted" style="font-weight:500">(optional)</span></b><small>JPG, PNG or WebP · up to 10 MB</small></div></div></div>
+          <div class="cell"><div class="cap">Upload · selected</div><div class="upload filled"><span class="avatar"><img data-sample alt="Preview of your photo"></span><div><b>priya-photo.jpg</b><small>1.2 MB · this will replace your initials</small></div><button class="btn ghost x" aria-label="Remove photo" style="min-height:44px;padding:0 8px"><svg class="icon"><use href="#i-close"/></svg></button></div></div>
+          <div class="cell"><div class="cap">Upload · error</div><div class="upload bad"><div class="ic"><svg class="icon" style="color:var(--danger)"><use href="#i-alert"/></svg></div><div><b>That file is over 10 MB</b><small>Choose a smaller photo. The rest of your form is safe.</small></div></div></div>
+        </div></div></div>
+
+      <!-- AVAILABILITY / BADGES -->
+      <div class="spec"><div class="spec-meta"><span class="n">4.6</span><h3>Availability & badges</h3><p>Availability is factual, never urgency. “Full” is neutral and switches the CTA to a waitlist.</p></div>
+        <div class="demo">
+          <div class="cell"><div class="cap">Availability pill</div><div class="stage">
+            <span class="pill"><span class="dot"></span>Taking new clients</span>
+            <span class="pill limited"><span class="dot"></span>Limited availability</span>
+            <span class="pill full"><span class="dot"></span>Currently full</span></div></div>
+          <div class="cell"><div class="cap">CTA when full</div><div class="stage"><button class="btn primary">Join the waitlist <svg class="icon sm"><use href="#i-arrow-right"/></svg></button><span class="hint">Same form, same lead capture, different label.</span></div></div>
+          <div class="cell"><div class="cap">Badges</div><div class="stage"><span class="badge accent">Personal coaching</span><span class="badge">Hands-on</span><span class="badge">Adaptive</span><span class="badge ok">Approved</span><span class="badge warn">Pending</span><span class="badge bad">Rejected</span></div></div>
+        </div></div>
+
+      <!-- ALERTS -->
+      <div class="spec"><div class="spec-meta"><span class="n">4.7</span><h3>Alerts & form results</h3><p>Success, failure and info blocks. Success never claims a scheduled time unless one exists.</p></div>
+        <div class="demo"><div class="cells c2">
+          <div class="alert ok" role="status"><svg class="icon"><use href="#i-check-circle"/></svg><div><b>Request received</b><p>Thanks, Priya — Akhil will message you on WhatsApp within 24 hours to arrange your free trial.</p></div></div>
+          <div class="alert bad" role="alert"><svg class="icon"><use href="#i-alert"/></svg><div><b>That didn’t send</b><p>Your details are still here. Try again, or message Akhil directly on WhatsApp.</p><div class="row" style="margin-top:12px"><button class="btn primary sm">Try again</button><button class="btn secondary sm"><svg class="icon sm"><use href="#i-whatsapp"/></svg>WhatsApp</button></div></div></div>
+          <div class="alert info"><svg class="icon"><use href="#i-info"/></svg><div><b>Reviewed before it appears</b><p>Akhil approves every testimonial before it goes on the website.</p></div></div>
+          <div class="alert warn"><svg class="icon"><use href="#i-alert"/></svg><div><b>Photo not uploaded</b><p>You can still send your testimonial without a photo.</p></div></div>
+        </div></div></div>
+
+      <!-- ACCORDION -->
+      <div class="spec"><div class="spec-meta"><span class="n">4.8</span><h3>FAQ accordion</h3><p>Native details/summary: keyboard and screen-reader ready. Sentence-case questions. Plus rotates to a cross when open.</p></div>
+        <div class="demo"><div class="faq">
+          <details open><summary>Do I need to already be fit to start?<svg class="icon"><use href="#i-plus"/></svg></summary><div class="ans">No. Training starts from where you are.</div></details>
+          <details><summary>I have an old injury or a bad knee/back. Can I still train?<svg class="icon"><use href="#i-plus"/></svg></summary><div class="ans">Let Akhil know about your condition before training so it can be taken into account.</div></details>
+          <details><summary>Why isn’t pricing listed here?<svg class="icon"><use href="#i-plus"/></svg></summary><div class="ans">Ongoing training is discussed based on your goals and schedule, after your trial.</div></details>
+        </div><p class="code">summary min-h 60 · Manrope 600 17 · answer 15 · divider #2A2A2D</p></div></div>
+
+      <!-- STEPS -->
+      <div class="spec"><div class="spec-meta"><span class="n">4.9</span><h3>Steps</h3><p>For “What happens next” and the free-trial sequence. Numbers in yellow, one idea per step.</p></div>
+        <div class="demo"><div class="steps">
+          <div class="step"><span class="no">01</span><div><h4>Submit</h4><p>Share a few details and your preferred training time.</p></div></div>
+          <div class="step"><span class="no">02</span><div><h4>Confirm</h4><p>Akhil reaches out on WhatsApp to confirm the trial slot.</p></div></div>
+          <div class="step"><span class="no">03</span><div><h4>Train</h4><p>Experience the coaching together.</p></div></div>
+          <div class="step"><span class="no">04</span><div><h4>Decide</h4><p>If it feels right, discuss ongoing training.</p></div></div>
+        </div></div></div>
+
+      <!-- AVATAR -->
+      <div class="spec"><div class="spec-meta"><span class="n">4.10</span><h3>Avatar</h3><p>Circle. Initials by default (first letters of the first and last name). If a photo was uploaded, it replaces the initials. No other change to the card.</p></div>
+        <div class="demo"><div class="cells c3">
+          <div class="cell"><div class="cap">Initials (default)</div><div class="stage"><span class="avatar sm">PS</span><span class="avatar">PS</span><span class="avatar lg">PS</span></div></div>
+          <div class="cell"><div class="cap">Photo (replaces initials)</div><div class="stage"><span class="avatar sm"><img data-sample alt=""></span><span class="avatar"><img data-sample alt=""></span><span class="avatar lg"><img data-sample alt=""></span></div></div>
+          <div class="cell"><div class="cap">Single name</div><div class="stage"><span class="avatar">A</span><span class="avatar">RK</span><span class="avatar">M</span></div></div>
+        </div><p class="code">32 / 44 / 64 · border 1.5 #454549 · initials Manrope 800 at 34% of size · photo object-fit cover, centered on face</p></div></div>
+      <!-- MOTIFS -->
+      <div class="spec" style="border:0"><div class="spec-meta"><span class="n">4.11</span><h3>Signal motifs</h3><p>The look of the references: angled slabs, one thin trace line, charcoal gradients. One motif per screen, beside or behind large type, never under body text.</p></div>
+        <div class="demo"><div class="cells c3">
+          <div class="cell"><div class="cap">Slash stack</div><div class="stage" style="min-height:170px;position:relative;overflow:hidden;justify-content:center"><div class="slashes" style="width:150px" aria-hidden="true"><i></i><i></i><i></i></div></div></div>
+          <div class="cell"><div class="cap">Trace line</div><div class="stage" style="min-height:170px;position:relative;overflow:hidden"><div class="trace" style="position:relative;width:100%" aria-hidden="true"></div></div></div>
+          <div class="cell"><div class="cap">Card gradient</div><div class="stage" style="min-height:170px;background:var(--surface-grad)"><span class="t-label">Card surface</span></div></div>
+        </div>
+        <div class="cells c2">
+          <div class="cell"><div class="cap">Headline with signal phrase</div><div class="stage col"><div class="t-h2">We help you <span>build it. Keep it.</span></div></div></div>
+          <div class="cell"><div class="cap">Slash bullets</div><div class="stage col"><ul class="slashlist"><li>Personalised training</li><li>Hands-on coaching</li><li>Accountability</li></ul></div></div>
+        </div>
+        <p class="code">slash: clip-path polygon(26% 0,100% 0,74% 100%,0 100%) · fill signal gradient · trace: 2.5px round joins · card gradient 60° #202023 → #0C0C0D</p></div></div>
+
+    </div>
+  </div>
+</section>
+
+<!-- ================= ICONS ================= -->
+<section class="section" id="icons">
+  <div class="container">
+    <div class="sh"><div><div class="eyebrow">05 / Icons</div><h2>One language.</h2></div><p>24px, 1.8px stroke, round caps and joins, <span class="code">currentColor</span>. Icons support meaning and never replace a label, except in an icon-only button that carries an accessible name.</p></div>
+    <div class="icons" id="icongrid"></div>
+  </div>
+</section>
+
+<!-- ================= CARDS ================= -->
+<section class="section" id="cards">
+  <div class="container">
+    <div class="sh"><div><div class="eyebrow">06 / Cards</div><h2>Evidence, not clutter.</h2></div><p>One job per card. Cards appear only when they help scanning. The testimonial card works with no photo.</p></div>
+    <div class="grid g3">
+      <article class="card method"><div><span class="kick">01 · Understand</span><h4 style="margin-top:12px">Start with you.</h4><p style="margin-top:8px">Your goals, routine and starting point come first.</p></div><span class="badge" style="align-self:flex-start">Method</span></article>
+      <div class="metric"><b>4+</b><span>Years of coaching experience</span></div>
+      <article class="card"><span class="kick">Value</span><div class="row" style="gap:10px"><svg class="icon" style="color:var(--accent-500)"><use href="#i-strength"/></svg></div><h4>Hands-on coaching</h4><p>Akhil personally trains and supervises every session.</p></article>
+    </div>
+
+    <div class="sh" style="margin:var(--sp-10) 0 var(--sp-6)"><div><div class="eyebrow">6.1</div><h2 style="font-size:36px">Testimonial card</h2></div><p>Initials avatar by default. When the client uploads a photo, it replaces the initials circle. Sample text below is placeholder copy, not a real client.</p></div>
+    <div class="grid g3">
+      <div class="cell"><div class="cap">Default · initials</div>
+        <article class="tcard"><blockquote>Sample testimonial: Akhil adjusted my training when my schedule changed, and I actually stayed consistent.</blockquote>
+          <footer><span class="avatar" aria-hidden="true">CN</span><div class="who"><b>Client Name</b><small>Occupation · Apartment Society</small></div></footer></article></div>
+      <div class="cell"><div class="cap">Photo uploaded · replaces initials</div>
+        <article class="tcard"><blockquote>Sample testimonial: I had tried before and fallen off. This time the sessions changed as I did.</blockquote>
+          <footer><span class="avatar"><img data-sample alt="Photo of Client Name"></span><div class="who"><b>Client Name</b><small>Occupation · Apartment Society</small></div></footer></article></div>
+      <div class="cell"><div class="cap">Long quote · clamped at 6 lines</div>
+        <article class="tcard"><blockquote class="clamp" id="lq">Sample long testimonial. When I started, I was unsure I could stick with anything. Akhil started with my routine and my goals, then adapted the sessions as things changed at work and at home. He follows up when I slip, and that accountability is what made the difference over months, not weeks. The training felt personal rather than generic, and I now understand what I am doing in each session and why it matters for the way I want to live.</blockquote>
+          <button class="more" id="lqbtn" aria-expanded="false">Read more</button>
+          <footer><span class="avatar" aria-hidden="true">CN</span><div class="who"><b>Client Name</b><small>Apartment Society</small></div></footer></article></div>
+    </div>
+    <div class="note" style="margin-top:20px"><b>Rules.</b> Name and society are required, occupation is optional (omit the separator when absent). Avatar 44px. Photo is <em>only</em> shown if uploaded <em>and</em> consent = true and status = approved. Never crop a photo to a different shape; it is always a circle. Quote text is the client’s own words, so no editing beyond approved formatting.</div>
+  </div>
+</section>
+
+<!-- ================= MOBILE ================= -->
+<section class="section" id="mobile">
+  <div class="container">
+    <div class="sh"><div><div class="eyebrow">07 / Mobile patterns · 375px</div><h2>Designed on the phone first.</h2></div><p>The visitor arrives by scanning a QR code. The first screen must show who Akhil is and offer the trial without scrolling through anything else. Swipe to see each frame.</p></div>
+    <div class="rail">
+
+      <div class="phone"><div class="cap">Home · first screen</div>
+        <div class="screen">
+          <div class="mhead"><a class="wordmark" href="#mobile">Akhil <i>Fitness</i></a><button class="btn secondary icon-only" style="--h:44px" aria-label="Open menu"><svg class="icon"><use href="#i-menu"/></svg></button></div>
+          <div class="mbody" style="position:relative;overflow:hidden">
+            <div class="slashes corner" aria-hidden="true"><i></i><i></i><i></i></div>
+            <span class="pill" style="position:relative;justify-self:start"><span class="dot"></span>Taking new clients</span>
+            <div style="position:relative"><div class="eyebrow">Personal training</div>
+              <h3 class="t-h1" style="margin-top:14px;font-size:46px">Don’t just get fit. <span>Learn how to stay fit.</span></h3></div>
+            <p class="t-lead" style="position:relative;font-size:17px">Personalised, hands-on coaching built around your goals, your starting point and your life.</p>
+            <div class="proof" style="position:relative"><div><b>4+</b><span>years coaching</span></div><div><b>50+</b><span>clients coached</span></div><div><b>2,400+</b><span>hours training</span></div></div>
+          </div>
+          <div class="mbar"><a class="btn primary" href="#mobile">Book a free trial</a><a class="btn secondary icon-only" href="#mobile" aria-label="Chat on WhatsApp"><svg class="icon"><use href="#i-whatsapp"/></svg></a></div>
+        </div></div>
+
+      <div class="phone"><div class="cap">Menu open</div>
+        <div class="screen">
+          <div class="mhead"><a class="wordmark" href="#mobile">Akhil <i>Fitness</i></a><button class="btn secondary icon-only" style="--h:44px" aria-label="Close menu"><svg class="icon"><use href="#i-close"/></svg></button></div>
+          <div class="mbody">
+            <nav class="menu" aria-label="Main"><a href="#mobile" aria-current="page">Home <svg class="icon"><use href="#i-arrow-right"/></svg></a><a href="#mobile">About <svg class="icon"><use href="#i-arrow-right"/></svg></a><a href="#mobile">Book a free trial <svg class="icon"><use href="#i-arrow-right"/></svg></a></nav>
+            <a class="btn secondary block" href="#mobile"><svg class="icon sm"><use href="#i-whatsapp"/></svg>Chat with Akhil on WhatsApp</a>
+            <span class="pill" style="justify-self:start"><span class="dot"></span>Taking new clients</span>
+            <p class="t-caption">Leave a testimonial · Connect page</p>
+          </div>
+        </div></div>
+
+      <div class="phone"><div class="cap">Trial form · idle → error</div>
+        <div class="screen">
+          <div class="mhead"><a class="wordmark" href="#mobile">Akhil <i>Fitness</i></a><span class="badge">Connect</span></div>
+          <div class="mbody">
+            <div><div class="eyebrow">Free trial</div><h3 class="t-h2" style="margin-top:10px;font-size:36px">Start with a session. <span>See if we’re a good fit.</span></h3></div>
+            <div class="field"><label for="m1">Name</label><input id="m1" class="ctl" placeholder="Your name"></div>
+            <div class="field error"><label for="m2">WhatsApp number</label><div class="prefix"><span>+91</span><input id="m2" class="ctl" value="98765 4321" inputmode="numeric"></div><div class="msg"><svg class="icon"><use href="#i-alert"/></svg>Enter a 10-digit mobile number.</div></div>
+            <div class="field"><label for="m3">Apartment / Society</label><input id="m3" class="ctl" placeholder="Your society name"></div>
+            <div class="field"><span class="lbl">Main goal</span><div class="chips"><label class="chip"><input type="radio" name="mg"><span><svg class="icon"><use href="#i-check"/></svg>Strength</span></label><label class="chip"><input type="radio" name="mg"><span><svg class="icon"><use href="#i-check"/></svg>Stamina</span></label><label class="chip"><input type="radio" name="mg"><span><svg class="icon"><use href="#i-check"/></svg>Other</span></label></div></div>
+            <button class="btn primary block">Book a free trial</button>
+          </div>
+        </div></div>
+
+      <div class="phone"><div class="cap">Trial form · sending → success</div>
+        <div class="screen">
+          <div class="mhead"><a class="wordmark" href="#mobile">Akhil <i>Fitness</i></a><span class="badge">Connect</span></div>
+          <div class="mbody">
+            <div class="field"><label for="n1">Name</label><input id="n1" class="ctl" value="Priya" disabled></div>
+            <button class="btn primary block" aria-busy="true"><svg class="icon sm spin"><use href="#i-spinner"/></svg>Sending…</button>
+            <hr style="border:0;border-top:1px dashed var(--border-strong);width:100%;margin:8px 0">
+            <div class="alert ok" role="status"><svg class="icon"><use href="#i-check-circle"/></svg><div><b>Request received</b><p>Thanks, Priya — Akhil will message you on WhatsApp within 24 hours to arrange your free trial.</p></div></div>
+            <a class="btn secondary block" href="#mobile"><svg class="icon sm"><use href="#i-whatsapp"/></svg>Chat with Akhil on WhatsApp</a>
+            <div class="steps" style="margin-top:8px"><div class="step"><span class="no">01</span><div><h4>Confirm</h4><p>Akhil reaches out on WhatsApp.</p></div></div><div class="step"><span class="no">02</span><div><h4>Train</h4><p>Experience the coaching together.</p></div></div></div>
+          </div>
+        </div></div>
+
+      <div class="phone"><div class="cap">Testimonial form</div>
+        <div class="screen">
+          <div class="mhead"><a class="wordmark" href="#mobile">Akhil <i>Fitness</i></a><span class="badge">Connect</span></div>
+          <div class="mbody">
+            <div><div class="eyebrow">Testimonial</div><h3 class="t-h2" style="margin-top:10px;font-size:34px">Trained with Akhil? <span>Share your experience.</span></h3><p class="hint" style="margin-top:8px">Your testimonial is reviewed by Akhil before it appears on the website.</p></div>
+            <div class="field"><label for="w1">Name</label><input id="w1" class="ctl"></div>
+            <div class="field"><label for="w2">Apartment / Society</label><input id="w2" class="ctl"></div>
+            <div class="field"><label for="w3">Occupation <span class="opt">(optional)</span></label><input id="w3" class="ctl"></div>
+            <div class="field"><label for="w4">Your experience</label><textarea id="w4" class="ctl"></textarea></div>
+            <div class="upload"><div class="ic"><svg class="icon"><use href="#i-upload"/></svg></div><div><b>Add a photo <span class="muted" style="font-weight:500">(optional)</span></b><small>Replaces your initials on the card</small></div></div>
+            <label class="check"><input type="checkbox"><span>I agree for this testimonial to be displayed publicly on the Akhil Fitness website with my name, society and photo (if I add one).</span></label>
+            <button class="btn primary block">Submit testimonial</button>
+          </div>
+        </div></div>
+
+    </div>
+    <div class="grid g3" style="margin-top:20px">
+      <div class="note"><b>Sticky bar.</b> Only on Home and About. Hidden on Connect (the form is the CTA) and while the keyboard is open. Height 68px, respects the iPhone safe area.</div>
+      <div class="note"><b>Menu.</b> Full-screen overlay, 64px rows, closes on route change and Esc. The trial link is always in the list.</div>
+      <div class="note"><b>Hero proof strip.</b> The scan-to-credibility answer: three verified numbers under the CTA copy. Values must match the PRD (4+ / 50+ / 2,400+).</div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= SECTION PATTERNS ================= -->
+<section class="section" id="patterns">
+  <div class="container">
+    <div class="sh"><div><div class="eyebrow">08 / Section patterns</div><h2>Page grammar.</h2></div><p>Every Home, About and Connect section, in the PRD order. They share the same spacing, type and CTA rules.</p></div>
+
+    <div class="pat"><div class="tag"><span class="t-label">Hero</span><span class="t-caption">Recognition · Promise · CTA</span></div>
+      <div class="body pat-hero" style="position:relative;overflow:hidden;background:var(--surface-grad)">
+        <div class="slashes" aria-hidden="true"><i></i><i></i><i></i></div>
+        <span class="pill" style="position:relative"><span class="dot"></span>Taking new clients</span>
+        <div class="eyebrow" style="margin-top:24px;position:relative">Personal training</div>
+        <h3 class="t-display" style="margin-top:14px;max-width:11ch;position:relative;font-size:clamp(44px,11vw,104px)">Don’t just get fit. <span>Learn how to stay fit.</span></h3>
+        <p class="t-lead" style="margin-top:20px;max-width:46ch;position:relative">Personalised, hands-on coaching built around your goals, your starting point and your life.</p>
+        <div class="row" style="margin-top:28px;position:relative"><button class="btn primary lg">Book a free trial <svg class="icon sm"><use href="#i-arrow-right"/></svg></button><button class="btn secondary lg"><svg class="icon sm"><use href="#i-whatsapp"/></svg>Chat on WhatsApp</button></div>
+      </div></div>
+
+    <div class="pat"><div class="tag"><span class="t-label">Philosophy · Method</span><span class="t-caption">Belief · How he coaches</span></div>
+      <div class="body two"><div><div class="eyebrow">Method</div><h3 class="t-h2" style="margin-top:12px">Start with you. <span>Build from there.</span></h3><p class="sec" style="margin-top:14px;max-width:44ch">There’s no single workout that works for everyone.</p></div>
+        <div class="steps"><div class="step"><span class="no">01</span><div><h4>Understand</h4><p>Your goals, routine and starting point.</p></div></div><div class="step"><span class="no">02</span><div><h4>Personalise</h4><p>Training around what you need.</p></div></div><div class="step"><span class="no">03</span><div><h4>Coach</h4><p>Hands-on, every session.</p></div></div><div class="step"><span class="no">04</span><div><h4>Adapt</h4><p>As you progress or things change.</p></div></div><div class="step"><span class="no">05</span><div><h4>Support</h4><p>Nutrition, goals and accountability.</p></div></div></div></div></div>
+
+    <div class="pat"><div class="tag"><span class="t-label">Value</span><span class="t-caption">More than a workout</span></div>
+      <div class="body"><h3 class="t-h2">More than a <span>workout.</span></h3>
+        <div class="grid g4" style="margin-top:28px">
+          <div class="card"><svg class="icon" style="color:var(--accent-500)"><use href="#i-user"/></svg><h4 style="font-size:22px">Personalised training</h4><p>Built around your goals and ability.</p></div>
+          <div class="card"><svg class="icon" style="color:var(--accent-500)"><use href="#i-strength"/></svg><h4 style="font-size:22px">Hands-on coaching</h4><p>Akhil personally trains and supervises every session.</p></div>
+          <div class="card"><svg class="icon" style="color:var(--accent-500)"><use href="#i-mobility"/></svg><h4 style="font-size:22px">Adaptable training</h4><p>Your training changes as you progress.</p></div>
+          <div class="card"><svg class="icon" style="color:var(--accent-500)"><use href="#i-progress"/></svg><h4 style="font-size:22px">Accountability</h4><p>Help getting back on track when consistency slips.</p></div>
+        </div></div></div>
+
+    <div class="pat"><div class="tag"><span class="t-label">Proof</span><span class="t-caption">Stack on mobile · 3 across on desktop · carousel optional</span></div>
+      <div class="body"><h3 class="t-h2">Real people. <span>Real progress.</span></h3>
+        <div class="grid g3" style="margin-top:28px">
+          <article class="tcard"><blockquote>Sample testimonial in the client’s own words.</blockquote><footer><span class="avatar">CN</span><div class="who"><b>Client Name</b><small>Occupation · Society</small></div></footer></article>
+          <article class="tcard"><blockquote>Sample testimonial with an uploaded photo.</blockquote><footer><span class="avatar"><img data-sample alt=""></span><div class="who"><b>Client Name</b><small>Society</small></div></footer></article>
+          <article class="tcard"><blockquote>Sample testimonial that shows behaviour change, not only weight.</blockquote><footer><span class="avatar">CN</span><div class="who"><b>Client Name</b><small>Occupation · Society</small></div></footer></article>
+        </div></div></div>
+
+    <div class="pat"><div class="tag"><span class="t-label">Experience</span><span class="t-caption">Three verified numbers only</span></div>
+      <div class="body"><h3 class="t-h2">Built through <span>hours of coaching.</span></h3>
+        <div class="grid g3" style="margin-top:28px"><div class="metric"><b>4+</b><span>Years of coaching experience</span></div><div class="metric"><b>2,400+</b><span>Hours of hands-on training</span></div><div class="metric"><b>50+</b><span>Clients coached</span></div></div></div></div>
+
+    <div class="pat"><div class="tag"><span class="t-label">Fit</span><span class="t-caption">Self-select, never call people out</span></div>
+      <div class="body two"><div><h3 class="t-h2">This works best when you take your fitness <span>seriously.</span></h3><p class="sec" style="margin-top:14px;max-width:44ch">You don’t need to be perfect. You do need to be willing to:</p></div>
+        <ul class="fitlist"><li><svg class="icon"><use href="#i-check-circle"/></svg>Stay consistent</li><li><svg class="icon"><use href="#i-check-circle"/></svg>Follow guidance</li><li><svg class="icon"><use href="#i-check-circle"/></svg>Give results time</li><li><svg class="icon"><use href="#i-check-circle"/></svg>Take responsibility for your progress</li></ul></div></div>
+
+    <div class="pat"><div class="tag"><span class="t-label">Free trial</span><span class="t-caption">The one signal surface on a page</span></div>
+      <div class="surface-accent on-accent body two"><div><div class="eyebrow" style="color:var(--ink-950)">Free trial</div><h3 class="t-h2" style="margin-top:12px;color:var(--ink-950)">Experience the coaching for yourself.</h3><p style="margin-top:14px;max-width:44ch">Your first session is a chance to understand where you’re starting, what you want to work towards and whether Akhil’s approach is right for you.</p><div class="row" style="margin-top:24px"><button class="btn inverse lg">Book a free trial <svg class="icon sm"><use href="#i-arrow-right"/></svg></button></div></div>
+        <ol class="steps" style="border-top:1.5px solid rgba(8,8,9,.25)"><li class="step" style="border-color:rgba(8,8,9,.2)"><span class="no" style="color:var(--ink-950)">01</span><b>Understand your goals</b></li><li class="step" style="border-color:rgba(8,8,9,.2)"><span class="no" style="color:var(--ink-950)">02</span><b>Assess your starting point</b></li><li class="step" style="border-color:rgba(8,8,9,.2)"><span class="no" style="color:var(--ink-950)">03</span><b>Train together</b></li><li class="step" style="border-color:rgba(8,8,9,.2)"><span class="no" style="color:var(--ink-950)">04</span><b>Decide what’s next</b></li></ol></div></div>
+
+    <div class="pat"><div class="tag"><span class="t-label">FAQ</span><span class="t-caption">Lighter visual weight than Proof and Trial</span></div>
+      <div class="body two"><div><h3 class="t-h2">Questions, answered.</h3></div><div class="faq"><details><summary>How much time do I need to commit?<svg class="icon"><use href="#i-plus"/></svg></summary><div class="ans">That depends on your goals and schedule. The important thing is finding a routine you can follow consistently.</div></details><details><summary>What if I’ve tried before and fallen off?<svg class="icon"><use href="#i-plus"/></svg></summary><div class="ans">That’s part of what coaching is for.</div></details></div></div></div>
+
+    <div class="pat"><div class="tag"><span class="t-label">Final CTA · Footer</span><span class="t-caption">One primary, one WhatsApp route</span></div>
+      <div class="body"><h3 class="t-h1" style="max-width:16ch">Ready to build something <span>that lasts?</span></h3>
+        <div class="row" style="margin-top:24px"><button class="btn primary lg">Book a free trial</button><button class="btn secondary lg"><svg class="icon sm"><use href="#i-whatsapp"/></svg>Have a question first?</button></div>
+        <div class="foot" style="margin-top:56px;padding-top:28px;border-top:1px solid var(--border-subtle)">
+          <div><a class="wordmark" href="#patterns" style="font-size:26px">Akhil <i>Fitness</i></a><p class="t-caption" style="margin-top:8px">Personal training in apartment society gyms. Build fitness that lasts.</p></div>
+          <div><a href="#patterns"><svg class="icon sm"><use href="#i-whatsapp"/></svg>WhatsApp Akhil</a><a href="#patterns"><svg class="icon sm"><use href="#i-phone"/></svg>Phone number</a><a href="#patterns"><svg class="icon sm"><use href="#i-mail"/></svg>Email address</a></div></div></div></div>
+
+    <div class="pat"><div class="tag"><span class="t-label">404</span><span class="t-caption">Route back to Home or the trial</span></div>
+      <div class="body" style="text-align:center;padding-block:64px"><div class="t-display" style="font-size:clamp(88px,26vw,200px);color:var(--accent-500)">404</div><h3 class="t-h3" style="margin-top:8px">That page <span>isn’t here.</span></h3><p class="sec" style="margin:12px auto 0;max-width:36ch">Head back home, or book your free trial.</p><div class="row" style="justify-content:center;margin-top:24px"><button class="btn primary">Go home</button><button class="btn secondary">Book a free trial</button></div></div></div>
+  </div>
+</section>
+
+<!-- ================= IMAGERY ================= -->
+<section class="section" id="imagery">
+  <div class="container">
+    <div class="sh"><div><div class="eyebrow">09 / Imagery</div><h2>Real people, real places.</h2></div><p>The PRD’s proof is human, so the imagery is too. Photography carries trust; the line motifs are only a light accent around it.</p></div>
+    <div class="grid g4">
+      <div class="cell"><div class="cap">Akhil portrait · 4:5</div><div class="frame ar-45"><span>Akhil, coaching<br>eye-level, natural light</span></div></div>
+      <div class="cell"><div class="cap">In the gym · 3:2</div><div class="frame ar-32"><span>Society gym session<br>hands-on cue</span></div></div>
+      <div class="cell"><div class="cap">Client (consented) · 1:1</div><div class="frame ar-11"><span>Portrait or training moment</span></div></div>
+      <div class="cell"><div class="cap">Wide band · 16:9</div><div class="frame ar-169"><span>Society or equipment context</span></div></div>
+    </div>
+    <div class="grid g3" style="margin-top:20px">
+      <div class="panel"><div class="eyebrow">Look</div><p class="sec" style="margin-top:10px;font-size:15px">Natural light, honest expressions, real gyms. Slight contrast lift and a neutral grade; grayscale is optional for atmospheric backgrounds only, never for people the visitor must recognise.</p></div>
+      <div class="panel"><div class="eyebrow">Never</div><p class="sec" style="margin-top:10px;font-size:15px">Stock athletes, before/after body comparisons, filters that hide faces, or a client photo without consent.</p></div>
+      <div class="panel"><div class="eyebrow">Delivery</div><p class="sec" style="margin-top:10px;font-size:15px">AVIF/WebP with a JPEG fallback, explicit width and height, lazy-load below the fold, hero image preloaded. Always provide alt text for meaningful images.</p></div>
+    </div>
+    <div class="grid g2" style="margin-top:20px">
+      <div class="panel"><div class="eyebrow">Graphic accents</div>
+        <div class="grid g3" style="margin-top:14px;gap:10px">
+          <div class="frame" style="height:92px;background:var(--surface-grad)"><div class="slashes" style="width:70px" aria-hidden="true"><i></i><i></i><i></i></div></div>
+          <div class="frame" style="height:92px;background:var(--surface-grad)"><div class="trace" style="position:relative;width:88%" aria-hidden="true"></div></div>
+          <div class="frame" style="height:92px;background:var(--accent-grad)"><div class="slashes dark" style="width:70px" aria-hidden="true"><i></i><i></i><i></i></div></div></div>
+        <p class="t-caption" style="margin-top:12px">Slash stack, trace line, and the signal panel. Use one per screen behind or beside large type. Not on every card or button.</p></div>
+      <div class="panel"><div class="eyebrow">Placeholder rule</div><p class="sec" style="margin-top:10px;font-size:15px">Until real photos exist, use the neutral frame with a caption of the shot needed. Do not use stock people. Every photo slot has a no-photo fallback (initials avatar, or the graphic accent).</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= OFF-SITE ================= -->
+<section class="section" id="offsite">
+  <div class="container">
+    <div class="sh"><div><div class="eyebrow">10 / Off-site kit</div><h2>Where people first meet the brand.</h2></div><p>Visitors arrive from society posters, MyGate and business cards, so these carry the same look as the site: charcoal gradient, angled slash stack, thin trace line and a condensed uppercase tagline. Every QR points to Home with a source tag. QR shown here is a placeholder; generate the real one from the final URL.</p></div>
+    <div class="grid g4" style="align-items:start">
+      <div class="cell"><div class="cap">Poster · 3:4 (scale to A3/A4)</div>
+        <div class="poster"><div class="slashes" aria-hidden="true"><i></i><i></i><i></i></div>
+          <span class="wordmark" style="font-size:11px">Akhil <i>Fitness</i></span>
+          <h4>Don’t just get fit. <b>Learn how to stay fit.</b></h4>
+          <div style="display:flex;gap:14px;align-items:flex-end"><span class="qr" data-qr></span><div><b style="font-size:13px;display:block;line-height:1.3">Scan to meet Akhil and book a free trial</b><small class="t-caption" style="display:block;margin-top:6px">?source=poster&amp;society=…</small></div></div></div></div>
+      <div class="cell"><div class="cap">MyGate post · 1:1</div>
+        <div class="mgate"><div class="slashes dark" aria-hidden="true"><i></i><i></i><i></i></div>
+          <span class="t-label" style="max-width:52%">Now training in your society</span>
+          <h4>Build <b>fitness</b> that lasts.</h4>
+          <div style="display:flex;justify-content:space-between;align-items:flex-end;gap:10px"><b style="font-size:14px;line-height:1.3">Free trial session.<br>Scan or message Akhil.</b><span class="qr" style="width:30%;background:var(--ink-950)" data-qr data-dark></span></div></div></div>
+      <div class="cell"><div class="cap">Business card · front / back (3.5 × 2 in)</div>
+        <div class="stack">
+          <div class="bcard front"><span class="wm">Akhil <i>Fitness</i></span></div>
+          <div class="bcard"><div class="trace" style="top:-8%;left:-6%;width:66%" aria-hidden="true"></div>
+            <div class="who"><b>Akhil</b><small>Personal trainer</small><small>+91 XXXXX XXXXX</small></div>
+            <span class="qr" style="position:absolute;right:6%;bottom:9%;width:30%" data-qr></span></div></div></div>
+      <div class="cell"><div class="cap">Link preview (OG) · 1200×630</div>
+        <div class="og"><div class="slashes" aria-hidden="true"><i></i><i></i><i></i></div>
+          <span class="wordmark">Akhil <i>Fitness</i></span>
+          <h4>Build <b>fitness</b> that lasts.</h4></div>
+        <p class="t-caption">Shown when the link is shared on WhatsApp. Also 1200×630 for social.</p></div>
+    </div>
+    <div class="note" style="margin-top:20px"><b>QR spec.</b> Minimum 3 cm printed, quiet zone 4 modules, dark on light, always with a short call to action. One QR per channel with <span class="code">?source=poster|mygate|business-card</span> and optional <span class="code">&amp;society=</span>. All land on Home. Logo is still TBD: the slash glyph beside the wordmark is a placeholder motif, not the logo.</div>
+  </div>
+</section>
+
+<!-- ================= RULES ================= -->
+<section class="section" id="rules">
+  <div class="container">
+    <div class="sh"><div><div class="eyebrow">11 / Motion & accessibility</div><h2>Energy, not noise.</h2></div><p>Motion signals state or hierarchy. It never delays a form.</p></div>
+    <div class="grid g2">
+      <div class="panel"><div class="eyebrow">Recommended</div><div class="mo" style="margin-top:14px"><i></i></div><p class="sec" style="margin-top:14px;font-size:15px">150ms for controls, 220ms for accordion and menu, 400ms for section reveals. Opacity and small translate only. Respect <span class="code">prefers-reduced-motion</span>.</p></div>
+      <div class="panel"><div class="eyebrow">Avoid</div><p class="sec" style="margin-top:14px;font-size:15px">Continuous decorative animation · large parallax · hover-only meaning · page transitions · anything that slows form completion.</p>
+        <div class="note" style="margin-top:14px"><b>Counters.</b> The 4+ / 50+ / 2,400+ numbers may count up once on first view. Final value must be in the HTML for no-JS and reduced motion.</div></div>
+    </div>
+    <div class="panel" style="margin-top:16px"><div class="eyebrow">Accessibility checklist</div>
+      <div class="grid g2" style="margin-top:14px"><p class="sec" style="font-size:15px">✓ WCAG AA contrast (measured, see Color)<br>✓ Visible focus ring on every interactive element<br>✓ 44px minimum tap targets<br>✓ Semantic heading order<br>✓ Labelled fields; errors tied to fields<br>✓ Keyboard-accessible accordion and menu</p><p class="sec" style="font-size:15px">✓ State is never color alone<br>✓ Alt text for meaningful images; empty alt for decorative<br>✓ Initials avatars are <span class="code">aria-hidden</span>; name is in text<br>✓ Reduced-motion support<br>✓ No hover-only information<br>✓ Inputs 16px (no iOS zoom)</p></div></div>
+
+    <div class="sh" style="margin-top:var(--sp-11)"><div><div class="eyebrow">12 / Guardrails & handoff</div><h2>Rules.</h2></div><p>Keep future pages inside the same family.</p></div>
+    <div class="grid g2">
+      <div class="do"><b>DO</b><p>Use the lime-yellow signal for the action, key numbers and the bold phrase in a headline. Keep surfaces charcoal-black. Let large condensed headlines and one slash shape carry the personality. Use real proof. Keep copy scannable. One primary CTA per context.</p></div>
+      <div class="dont"><b>DON’T</b><p>Put a signal button on a signal surface. Use uppercase for long headings. Use more than one slash motif per screen. Turn every section into a card. Add a second accent color. Repeat “Book a free trial” after every section. Invent claims.</p></div>
+      <div class="do"><b>DO</b><p>Preserve form values after failure. Offer WhatsApp as the fallback. Show the avatar circle when there is no photo. Publish a testimonial only with consent and approval.</p></div>
+      <div class="dont"><b>DON’T</b><p>Hide errors. Show a scheduled time that isn’t confirmed. Rely on a photo for a testimonial to work. Show private lead data anywhere public.</p></div>
+    </div>
+    <div class="grid g2" style="margin-top:20px">
+      <div><div class="eyebrow" style="margin-bottom:10px">Tailwind mapping (Astro)</div>
+<pre class="snip">// tailwind.config.js
+theme: { extend: {
+  colors: {
+    ink: { 950:'#080809', 900:'#0D0D0F', 800:'#171719',
+           600:'#303034', 400:'#8A8A90', 300:'#A8A8AD', 200:'#C9C9CC' },
+    paper: '#F5F5F1',
+    accent: { 400:'#C6F55A', 500:'#B4F22A', 600:'#94CC17' },
+    danger:'#FF6B6F', warning:'#FFB547', success:'#55D68A', info:'#62B6FF',
+  },
+  fontFamily: {
+    display: ['"Barlow Condensed"','Arial Narrow','sans-serif'],
+    body: ['Manrope','system-ui','sans-serif'],
+  },
+  borderRadius: { sm:'10px', md:'14px', lg:'20px' },
+}}</pre></div>
+      <div><div class="eyebrow" style="margin-bottom:10px">Build order</div>
+        <ol class="steps"><li class="step"><span class="no">01</span><div><h4>Tokens & fonts</h4><p>Colors, type, spacing, motion. Self-hosted fonts.</p></div></li><li class="step"><span class="no">02</span><div><h4>Primitives</h4><p>Button, fields, chips, consent, upload, alerts, avatar.</p></div></li><li class="step"><span class="no">03</span><div><h4>Cards & sections</h4><p>Method, metric, testimonial, FAQ, steps, patterns.</p></div></li><li class="step"><span class="no">04</span><div><h4>Mobile shell</h4><p>Header, menu, sticky bar, footer.</p></div></li><li class="step"><span class="no">05</span><div><h4>Pages & off-site kit</h4><p>Home, About, Connect, 404, then poster and cards.</p></div></li></ol></div>
+    </div>
+  </div>
+</section>
+</main>
+
+<footer class="footer"><div class="container">Akhil Fitness · Design System V5.1 · Aligned to PRD v1.1 · Logo intentionally deferred.</div></footer>
+
+<script>
+/* placeholder portrait for demo photos */
+var SAMPLE="data:image/svg+xml,"+encodeURIComponent("<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 80 80'><rect width='80' height='80' fill='#3a3a3e'/><circle cx='40' cy='32' r='14' fill='#A8A8AD'/><path d='M10 80c2-24 16-32 30-32s28 8 30 32z' fill='#A8A8AD'/></svg>");
+document.querySelectorAll("img[data-sample]").forEach(function(i){i.src=SAMPLE});
+/* icon grid */
+var names=["arrow-right","arrow-left","arrow-down","chevron-down","plus","minus","close","check","check-circle","alert","info","menu","whatsapp","phone","mail","location","clock","calendar","upload","user","strength","stamina","mobility","progress","external","spinner"];
+document.getElementById("icongrid").innerHTML=names.map(function(n){return '<div><svg class="icon"><use href="#i-'+n+'"/></svg><span>'+n+'</span></div>'}).join("");
+/* read more */
+var b=document.getElementById("lqbtn"),q=document.getElementById("lq");
+b.addEventListener("click",function(){var o=q.classList.toggle("clamp")===false;b.textContent=o?"Show less":"Read more";b.setAttribute("aria-expanded",o)});
+/* placeholder QR */
+function qr(el){var n=21,s=7,cells="",fg=el.hasAttribute("data-dark")?"#F5F5F1":"#080809";
+ function f(x,y){return (x<7&&y<7)||(x>=n-7&&y<7)||(x<7&&y>=n-7)}
+ function fin(x,y){var a=[[0,0],[n-7,0],[0,n-7]];for(var k=0;k<3;k++){var dx=x-a[k][0],dy=y-a[k][1];if(dx>=0&&dx<7&&dy>=0&&dy<7){var e=dx==0||dx==6||dy==0||dy==6,c=dx>=2&&dx<=4&&dy>=2&&dy<=4;return e||c}}return false}
+ var r=7;for(var y=0;y<n;y++)for(var x=0;x<n;x++){var on;if(f(x,y))on=fin(x,y);else{r=(r*9301+49297)%233280;on=r/233280>.5}if(on)cells+='<rect x="'+x+'" y="'+y+'" width="1" height="1"/>'}
+ el.innerHTML='<svg viewBox="0 0 '+n+' '+n+'" fill="'+fg+'" shape-rendering="crispEdges" role="img" aria-label="Placeholder QR code">'+cells+'</svg>'}
+document.querySelectorAll("[data-qr]").forEach(qr);
+</script>
+</body>
+</html>

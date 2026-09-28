@@ -1,0 +1,55 @@
+---
+import Button from './ui/Button.astro';
+import Icon from './ui/Icon.astro';
+import Wordmark from './Wordmark.astro';
+import { trialHref, trialLabel, waGeneral } from '../data/site';
+
+interface Props { current?: 'home' | 'about' | 'connect' }
+const { current } = Astro.props;
+const links = [
+  { key: 'home', href: '/', label: 'Home' },
+  { key: 'about', href: '/about', label: 'About' },
+] as const;
+---
+<header class="site-header">
+  <div class="container in">
+    <Wordmark iconOnly />
+
+    <nav class="desk-nav" aria-label="Main">
+      {links.map((l) => <a class="nav-link" href={l.href} aria-current={current === l.key ? 'page' : undefined}>{l.label}</a>)}
+      <Button href={trialHref} size="sm" data-track="cta-trial" data-where="header">{trialLabel()}</Button>
+      <Button href={waGeneral()} variant="secondary" size="sm" iconOnly icon="whatsapp" label="Chat with Akhil on WhatsApp" data-track="whatsapp" data-where="header" target="_blank" rel="noopener" />
+    </nav>
+
+    <button type="button" class="btn secondary icon-only menu-open" style="--h:44px" aria-label="Open menu" aria-haspopup="dialog" aria-controls="menu">
+      <Icon name="menu" />
+    </button>
+  </div>
+
+  <dialog id="menu" class="menu-dialog" aria-label="Menu">
+    <div class="mhead">
+      <Wordmark />
+      <button type="button" class="btn secondary icon-only menu-close" style="--h:44px" aria-label="Close menu"><Icon name="close" /></button>
+    </div>
+    <div class="mbody">
+      <nav class="menu" aria-label="Main">
+        <a href="/" aria-current={current === 'home' ? 'page' : undefined}>Home <Icon name="arrow-right" /></a>
+        <a href="/about" aria-current={current === 'about' ? 'page' : undefined}>About <Icon name="arrow-right" /></a>
+        <a href={trialHref} data-track="cta-trial" data-where="menu">{trialLabel()} <Icon name="arrow-right" /></a>
+        <a href="/connect#testimonial">Leave a testimonial <Icon name="arrow-right" /></a>
+      </nav>
+    </div>
+  </dialog>
+</header>
+
+<script>
+  const dialog = document.getElementById('menu') as HTMLDialogElement | null;
+  const openBtn = document.querySelector<HTMLButtonElement>('.menu-open');
+  if (dialog && openBtn) {
+    openBtn.addEventListener('click', () => dialog.showModal());
+    dialog.querySelector('.menu-close')?.addEventListener('click', () => dialog.close());
+    // Close when a link is chosen (same-page anchors don't reload) and when the viewport grows to desktop.
+    dialog.querySelectorAll('a').forEach((a) => a.addEventListener('click', () => dialog.close()));
+    window.matchMedia('(min-width: 1024px)').addEventListener('change', (e) => { if (e.matches) dialog.close(); });
+  }
+</script>

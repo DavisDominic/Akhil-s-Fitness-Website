@@ -1,0 +1,7 @@
+---
+import { site } from '../data/site';
+// The three verified figures (4+ / 2,400+ / 50+). Final values live in the HTML: no JS needed.
+---
+<div class="metrics">
+  {site.metrics.map((m) => <div class="metric"><b>{m.value}</b><span>{m.label}</span></div>)}
+</div>

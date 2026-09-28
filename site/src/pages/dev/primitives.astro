@@ -1,0 +1,47 @@
+---
+// Dev-only visual check of step-1 primitives. Not part of the public site (noindex; removed from production in step 6).
+import Base from '../../layouts/Base.astro';
+import Button from '../../components/ui/Button.astro';
+import Field from '../../components/ui/Field.astro';
+import Chips from '../../components/ui/Chips.astro';
+import Consent from '../../components/ui/Consent.astro';
+import Alert from '../../components/ui/Alert.astro';
+import Avatar from '../../components/ui/Avatar.astro';
+import Upload from '../../components/ui/Upload.astro';
+const goals = ['Weight loss', 'Strength', 'Stamina', 'Mobility', 'General fitness', 'Other'].map((l) => ({ value: l.toLowerCase().replace(/ /g, '-'), label: l }));
+---
+<Base title="Primitives — dev" noindex bare>
+  <div class="container" style="padding-block:var(--sp-9);display:grid;gap:40px;max-width:720px">
+    <h1 class="t-h1">Prim<span>itives</span></h1>
+
+    <section class="stack"><h2 class="t-h3">Buttons</h2>
+      <div class="row">
+        <Button icon="arrow-right">Book a free trial</Button>
+        <Button variant="secondary" iconBefore="whatsapp">Chat on WhatsApp</Button>
+        <Button variant="ghost" icon="arrow-right">Learn more</Button>
+        <Button variant="secondary" iconOnly icon="whatsapp" label="Chat on WhatsApp" />
+      </div>
+      <div class="row"><Button size="sm">Small</Button><Button>Default</Button><Button size="lg">Large</Button><Button busy>Sending…</Button><Button disabled>Disabled</Button></div>
+    </section>
+
+    <section class="stack"><h2 class="t-h3">Fields</h2>
+      <Field id="name" label="Name" placeholder="Your name" autocomplete="name" />
+      <Field id="wa-err" label="WhatsApp number" prefix="+91" inputmode="numeric" value="98765 4321" error="Enter a 10-digit mobile number." />
+      <Field id="wa-ok" label="WhatsApp number" prefix="+91" inputmode="numeric" value="98765 43210" success="Looks good" />
+      <Field id="occ" label="Occupation" optional placeholder="e.g. Software engineer" hint="Shown next to your name if you agree below." />
+      <Field id="exp" label="Your experience" multiline placeholder="Tell us about your experience training with Akhil." hint="A few sentences is plenty." />
+      <Chips name="goal" label="What would you most like to work on?" options={goals} selected="strength" />
+      <Consent id="consent" />
+      <Upload id="p1" />
+      <Upload id="p2" state="filled" fileName="priya-photo.jpg" detail="1.2 MB · this will replace your initials" />
+      <Upload id="p3" state="error" error="That file is over 10 MB" />
+    </section>
+
+    <section class="stack"><h2 class="t-h3">Alerts & avatars</h2>
+      <Alert tone="ok" title="Request received">Thanks, Priya — Akhil will message you on WhatsApp within 24 hours to arrange your free trial.</Alert>
+      <Alert tone="bad" title="That didn’t send">Your details are still here. Try again, or message Akhil directly on WhatsApp.</Alert>
+      <Alert tone="info" title="Reviewed before it appears">Akhil approves every testimonial before it goes on the website.</Alert>
+      <div class="row"><Avatar name="Priya Sharma" size="sm" /><Avatar name="Priya Sharma" /><Avatar name="Priya Sharma" size="lg" /><Avatar name="Ravi" /></div>
+    </section>
+  </div>
+</Base>

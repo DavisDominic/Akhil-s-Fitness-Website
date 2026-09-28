@@ -1,0 +1,11 @@
+---
+import Icon from './Icon.astro';
+interface Props { tone?: 'ok' | 'bad' | 'info' | 'warn'; title: string }
+const { tone = 'info', title } = Astro.props;
+const icon = { ok: 'check-circle', bad: 'alert', info: 'info', warn: 'alert' }[tone];
+const role = tone === 'bad' ? 'alert' : tone === 'ok' ? 'status' : undefined;
+---
+<div class={`alert ${tone}`} role={role}>
+  <Icon name={icon} />
+  <div><b>{title}</b><p><slot /></p><slot name="actions" /></div>
+</div>

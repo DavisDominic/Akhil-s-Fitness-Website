@@ -1,0 +1,33 @@
+/* Ported from Design System V5.1 (BASE + type roles). */
+*{box-sizing:border-box}
+html{scroll-behavior:smooth;-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg-page);color:var(--text-primary);font:400 var(--fs-md)/1.55 var(--font-body);-webkit-font-smoothing:antialiased}
+h1,h2,h3,h4,p,ul,ol,figure{margin:0}
+ul,ol{padding:0;list-style:none}
+a{color:inherit}
+button,input,select,textarea{font:inherit;color:inherit}
+button{cursor:pointer}
+img{max-width:100%;display:block}
+::selection{background:var(--accent-500);color:var(--ink-950)}
+:focus-visible{outline:3px solid var(--focus);outline-offset:3px}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+
+/* type roles */
+.t-display{font:800 var(--fs-display)/.9 var(--font-display);letter-spacing:-.02em;text-transform:uppercase}
+.t-h1{font:800 var(--fs-h1)/.98 var(--font-display);letter-spacing:-.015em;text-transform:uppercase}
+.t-h2{font:700 var(--fs-h2)/1.02 var(--font-display);letter-spacing:-.01em}
+.t-h3{font:700 var(--fs-h3)/1.05 var(--font-display);letter-spacing:-.005em}
+.t-h4{font:700 var(--fs-h4)/1.1 var(--font-display)}
+.t-display span,.t-h1 span,.t-h2 span,.t-h3 span,.hl{color:var(--accent-500)}
+.t-lead{font:500 var(--fs-lg)/1.55 var(--font-body);color:var(--text-secondary)}
+.t-body{font:400 var(--fs-md)/1.55 var(--font-body)}
+.t-small{font:500 var(--fs-sm)/1.5 var(--font-body)}
+.t-label{font:700 13px/1.2 var(--font-body);letter-spacing:.08em;text-transform:uppercase}
+.t-caption{font:500 var(--fs-xs)/1.4 var(--font-body);color:var(--text-muted)}
+.eyebrow{font:700 13px/1 var(--font-body);letter-spacing:.1em;text-transform:uppercase;color:var(--accent-500)}
+.muted{color:var(--text-muted)}.sec{color:var(--text-secondary)}.yellow{color:var(--accent-500)}
+.code{font:500 12px/1.5 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;color:var(--ink-300)}
+@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}*,*::before,*::after{animation-duration:.001ms!important;animation-iteration-count:1!important;transition-duration:.001ms!important}}
+
+/* Component display rules must never override the HTML `hidden` attribute. */
+[hidden]{display:none!important}

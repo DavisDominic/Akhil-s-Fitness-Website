@@ -1,0 +1,6 @@
+---
+import { site, availabilityText } from '../data/site';
+// Factual availability, never urgency. "Full" is neutral (hollow dot), not red (DS 4.6).
+const a = site.availability;
+---
+<span class:list={['pill', a === 'limited' && 'limited', a === 'full' && 'full']}><span class="dot" aria-hidden="true"></span>{availabilityText[a]}</span>

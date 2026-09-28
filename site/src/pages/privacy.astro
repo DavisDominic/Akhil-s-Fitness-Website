@@ -1,0 +1,37 @@
+---
+import Base from '../layouts/Base.astro';
+import { site } from '../data/site';
+// DRAFT for Akhil's review (addendum §4.10). Retention periods in [brackets] are proposals and must be confirmed.
+// Utility page like the 404, not a fourth marketing page. Not legal advice; have it checked before launch.
+---
+<Base title="Privacy | Akhil’s Fitness Coaching" description="How Akhil’s Fitness Coaching uses the details you share through this website.">
+  <section class="section flush" style="padding-top:var(--sp-9)">
+    <div class="container prose">
+      <p class="eyebrow">Privacy</p>
+      <h1 class="t-h1">How your details <span>are used.</span></h1>
+      <p>This site collects only what is needed for the purpose below. Nothing you submit is shown publicly unless you agree to it.</p>
+
+      <h2>Free-trial requests</h2>
+      <ul>
+        <li>What we collect: your name, WhatsApp number, apartment/society, main goal and preferred regular training time.</li>
+        <li>Why: so Akhil can contact you on WhatsApp to arrange your free trial and understand whether ongoing training would suit you.</li>
+        <li>Who sees it: Akhil. It is stored securely and is never published.</li>
+        <li>How long: [12 months after your last contact, then deleted].</li>
+      </ul>
+
+      <h2>Testimonials</h2>
+      <ul>
+        <li>What we collect: your name, society, optional occupation, your written experience and an optional photo.</li>
+        <li>Why: to show your experience on the website, only if you tick the consent box and Akhil approves it.</li>
+        <li>Your words are shown as you wrote them. Only what you consented to is shown publicly.</li>
+        <li>Testimonials that are not approved are never shown. [Kept for up to 12 months, then deleted].</li>
+      </ul>
+
+      <h2>Services that handle your details</h2>
+      <p>To run the site, submissions pass through Cloudflare (hosting and storage), Telegram (an instant alert to Akhil) and Google Sheets (a backup copy). Visits are counted with privacy-friendly analytics that do not use cookies to track you.</p>
+
+      <h2>Your choices</h2>
+      <p>You can ask to see, correct or delete your details, or withdraw a testimonial, at any time. Message Akhil on <a href={`https://wa.me/${site.whatsapp}`}>WhatsApp</a> or email <a href={`mailto:${site.email}`}>{site.email}</a>.</p>
+    </div>
+  </section>
+</Base>

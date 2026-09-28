@@ -1,0 +1,142 @@
+/* Ported from Design System V5.1 (components). Class names match the design-system doc. */
+.icon{width:24px;height:24px;flex:none;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.icon.sm{width:20px;height:20px}
+/* buttons */
+.btn{--h:52px;min-height:var(--h);padding:0 22px;border-radius:var(--r-sm);border:1.5px solid transparent;display:inline-flex;align-items:center;justify-content:center;gap:10px;font:700 16px/1.1 var(--font-body);letter-spacing:-.005em;text-decoration:none;white-space:nowrap;transition:background var(--dur-fast) var(--ease),border-color var(--dur-fast) var(--ease),color var(--dur-fast) var(--ease),transform var(--dur-fast) var(--ease);background:none}
+.btn.sm{--h:44px;padding:0 16px;font-size:15px}.btn.lg{--h:60px;padding:0 28px}.btn.wide{width:100%}
+.btn.primary{background:var(--accent-500);color:var(--ink-950)}
+.btn.primary:hover,.btn.primary.is-hover{background:var(--accent-400)}
+.btn.primary:active{background:var(--accent-600);transform:translateY(1px)}
+.btn.secondary{border-color:var(--border-control);color:var(--paper)}
+.btn.secondary:hover,.btn.secondary.is-hover{border-color:var(--accent-500);color:var(--accent-500)}
+.btn.ghost{padding-inline:10px;color:var(--ink-200)}.btn.ghost:hover{color:var(--accent-500)}
+.btn.inverse{background:var(--ink-950);color:var(--accent-500)}.btn.inverse:hover{background:#000}
+.btn.icon-only{width:var(--h);padding:0;border-color:var(--border-control)}
+.btn.icon-only:hover{border-color:var(--accent-500);color:var(--accent-500)}
+.btn.is-focus{outline:3px solid var(--focus);outline-offset:3px}
+.btn[disabled],.btn.is-disabled{opacity:.4;cursor:not-allowed;pointer-events:none}
+.btn[aria-busy=true]{pointer-events:none}
+.spin{animation:spin .8s linear infinite}@keyframes spin{to{transform:rotate(360deg)}}
+.tlink{color:var(--accent-500);font-weight:700;text-decoration:underline;text-underline-offset:4px;text-decoration-thickness:1.5px}
+.tlink:hover{color:var(--accent-400)}
+/* fields */
+.field{display:grid;gap:8px}
+.field>label,.field>.lbl{font:700 17px/1.3 var(--font-body)}
+.field .opt{font-weight:500;color:var(--text-muted)}
+.hint{font-size:13px;color:var(--text-muted)}
+.ctl{width:100%;min-height:52px;padding:14px 16px;background:var(--ink-850);border:1.5px solid var(--border-control);border-radius:var(--r-sm);font-size:18px;outline:none;transition:border-color var(--dur-fast),box-shadow var(--dur-fast)}
+.ctl::placeholder{color:#7C7C82}
+textarea.ctl{min-height:132px;resize:vertical}
+.ctl:hover{border-color:#8A8A90}
+.ctl:focus,.ctl.is-focus{border-color:var(--accent-500);box-shadow:0 0 0 3px var(--accent-tint)}
+.field.error .ctl{border-color:var(--danger)}
+.field.success .ctl{border-color:var(--success)}
+.ctl:disabled{opacity:.45;cursor:not-allowed}
+.msg{display:flex;gap:8px;align-items:flex-start;font-size:13px;font-weight:600}
+.msg .icon{width:18px;height:18px;margin-top:1px}
+.field.error .msg{color:var(--danger)}.field.success .msg{color:var(--success)}
+.prefix{display:flex}
+.prefix>span{display:flex;align-items:center;padding:0 14px;min-height:52px;background:var(--ink-800);border:1.5px solid var(--border-control);border-right:0;border-radius:var(--r-sm) 0 0 var(--r-sm);font-weight:700;color:var(--ink-200)}
+.prefix .ctl{border-radius:0 var(--r-sm) var(--r-sm) 0}
+.selectwrap{position:relative}.selectwrap select{appearance:none;padding-right:48px}
+.selectwrap .icon{position:absolute;right:14px;top:14px;pointer-events:none}
+/* chips */
+.chips{display:flex;flex-wrap:wrap;gap:10px}
+.chip{position:relative}
+.chip input{position:absolute;opacity:0;inset:0;width:100%;height:100%;margin:0;cursor:pointer}
+.chip span{display:inline-flex;align-items:center;gap:8px;min-height:var(--tap);padding:0 16px;border-radius:var(--r-pill);border:1.5px solid var(--border-control);font-weight:600;font-size:18px;transition:all var(--dur-fast)}
+.chip span .icon{width:18px;height:18px;display:none}
+.chip:hover span{border-color:var(--accent-500)}
+.chip input:checked+span{background:var(--accent-500);border-color:var(--accent-500);color:var(--ink-950)}
+.chip input:checked+span .icon{display:block}
+.chip input:focus-visible+span{outline:3px solid var(--focus);outline-offset:3px}
+/* checkbox */
+.check{display:flex;gap:12px;align-items:flex-start;cursor:pointer;padding:6px 0;font-size:14px;color:var(--text-secondary);line-height:1.5}
+.check input{appearance:none;flex:none;width:24px;height:24px;margin:1px 0 0;border:1.5px solid var(--border-control);border-radius:7px;background:var(--ink-850);display:grid;place-items:center;cursor:pointer;transition:all var(--dur-fast)}
+.check input:checked{background:var(--accent-500);border-color:var(--accent-500)}
+.check input:checked::after{content:"";width:6px;height:11px;border:solid var(--ink-950);border-width:0 2.5px 2.5px 0;transform:translateY(-1px) rotate(45deg)}
+.check input:focus-visible{outline:3px solid var(--focus);outline-offset:3px}
+/* upload */
+.upload{display:flex;gap:14px;align-items:center;padding:16px;border:1.5px dashed var(--border-control);border-radius:var(--r-md);background:var(--ink-850)}
+.upload .ic{width:44px;height:44px;border-radius:50%;background:var(--ink-700);display:grid;place-items:center;flex:none}
+.upload b{display:block;font-size:15px}.upload small{color:var(--text-muted);font-size:13px}
+.upload.filled{border-style:solid;border-color:var(--border-strong)}
+.upload.bad{border-color:var(--danger)}
+.upload .x{margin-left:auto}
+/* availability */
+.pill{display:inline-flex;align-items:center;gap:10px;min-height:36px;padding:0 14px;border-radius:var(--r-pill);border:1px solid var(--border-strong);background:var(--ink-850);font:600 14px/1 var(--font-body)}
+.pill .dot{width:9px;height:9px;border-radius:50%;background:var(--success);box-shadow:0 0 0 4px rgba(85,214,138,.14)}
+.pill.limited .dot{background:var(--warning);box-shadow:0 0 0 4px rgba(255,181,71,.14)}
+.pill.full .dot{background:transparent;border:2px solid var(--ink-300);box-shadow:none}
+/* badges */
+.badge{display:inline-flex;align-items:center;gap:6px;min-height:28px;padding:0 12px;border-radius:var(--r-pill);border:1px solid var(--border-strong);font:700 12px/1 var(--font-body);letter-spacing:.06em;text-transform:uppercase;color:var(--ink-200)}
+.badge.accent{background:var(--accent-500);border-color:var(--accent-500);color:var(--ink-950)}
+.badge.ok{color:var(--success);border-color:rgba(85,214,138,.4)}.badge.warn{color:var(--warning);border-color:rgba(255,181,71,.4)}.badge.bad{color:var(--danger);border-color:rgba(255,107,111,.4)}
+/* alerts */
+.alert{display:flex;gap:12px;padding:14px 16px;border-radius:var(--r-md);border:1px solid var(--border-strong);background:var(--ink-850)}
+.alert .icon{margin-top:1px}.alert b{display:block;font-size:15px}.alert p{font-size:14px;color:var(--text-secondary);margin-top:2px}
+.alert.ok{border-color:rgba(85,214,138,.45)}.alert.ok>.icon{color:var(--success)}
+.alert.bad{border-color:rgba(255,107,111,.5)}.alert.bad>.icon{color:var(--danger)}
+.alert.info{border-color:rgba(98,182,255,.45)}.alert.info>.icon{color:var(--info)}
+.alert.warn{border-color:rgba(255,181,71,.5)}.alert.warn>.icon{color:var(--warning)}
+/* avatar */
+.avatar{--s:44px;width:var(--s);height:var(--s);border-radius:50%;flex:none;display:grid;place-items:center;overflow:hidden;background:var(--ink-700);color:var(--accent-500);font:800 calc(var(--s)*.34)/1 var(--font-body);letter-spacing:.02em;border:1.5px solid var(--border-strong)}
+.avatar img{width:100%;height:100%;object-fit:cover}
+.avatar.lg{--s:64px}.avatar.sm{--s:32px}
+/* accordion */
+.faq{border-top:1px solid var(--border-strong)}
+.faq details{border-bottom:1px solid var(--border-subtle)}
+.faq summary{list-style:none;cursor:pointer;min-height:60px;padding:16px 0;display:flex;justify-content:space-between;align-items:center;gap:16px;font:600 17px/1.35 var(--font-body)}
+.faq summary::-webkit-details-marker{display:none}
+.faq summary .icon{color:var(--accent-500);transition:transform var(--dur-base) var(--ease)}
+.faq details[open] summary .icon{transform:rotate(45deg)}
+.faq details[open] summary{color:var(--accent-500)}
+.faq .ans{padding:0 40px 20px 0;color:var(--text-secondary);font-size:15px}
+/* steps */
+.steps{display:grid}
+.step{display:grid;grid-template-columns:48px 1fr;gap:12px;padding:18px 0;border-bottom:1px solid var(--border-subtle)}
+.step:last-child{border-bottom:0}
+.step .no{font:700 14px/1.6 var(--font-body);color:var(--accent-500)}
+.step h4{font:700 22px/1.1 var(--font-display)}.step p{font-size:14px;color:var(--text-secondary);margin-top:4px}
+/* cards */
+.card{background:var(--surface-grad);border:1px solid var(--border-subtle);border-radius:var(--r-lg);padding:24px;display:flex;flex-direction:column;gap:12px}
+.card .kick{font:700 12px/1 var(--font-body);letter-spacing:.1em;text-transform:uppercase;color:var(--accent-500)}
+/* Card body copy uses the design system's own "card text" role (.t-small: 500 weight, 14px) rather than a
+   one-off size — this is what made the Value cards (was 15px) and the metric captions (was 14px but 400
+   weight) look like two different styles for the same short-caption job. */
+.card p{font:500 var(--fs-sm)/1.5 var(--font-body);color:var(--text-secondary)}
+.card.method{min-height:200px;justify-content:space-between}
+.metric{padding:24px;background:var(--surface-grad);border:1px solid var(--border-subtle);border-radius:var(--r-lg)}
+.metric b{display:block;font:800 clamp(52px,12vw,72px)/.95 var(--font-display);color:var(--accent-500)}
+.metric span{display:block;margin-top:10px;font:500 var(--fs-sm)/1.5 var(--font-body);color:var(--text-secondary)}
+/* testimonial card — solid accent panel (not the dark .card gradient), matching the mockup: real quote-mark
+   icons (not a unicode glyph) top-left and bottom-right of the text, a dark divider, then the avatar row. */
+.tcard{background:var(--accent-grad);color:var(--ink-950);border:0;border-radius:var(--r-lg);padding:28px 24px 24px;display:flex;flex-direction:column}
+.tcard-quote{width:34px;height:34px;flex:none}
+/* The source glyph's natural orientation reads as a CLOSING mark (tails pointing down) — correct as-is for the
+   bottom-right icon, but the top-left one needs to be mirrored 180° so its tails point up, the way an opening
+   quote mark should. */
+.tcard-quote.open{transform:rotate(180deg)}
+/* Pulled up tight against the last line of the quote (a small negative margin, not the paragraph's own
+   line-height leading) so it reads as trailing punctuation on that sentence, not a separately-spaced element. */
+.tcard-quote.close{align-self:flex-end;margin-top:-10px}
+.tcard blockquote{margin:14px 0 0;font:500 18px/1.55 var(--font-body);color:var(--ink-950)}
+.tcard blockquote.clamp{display:-webkit-box;-webkit-line-clamp:6;-webkit-box-orient:vertical;overflow:hidden}
+.tcard .more{align-self:flex-start;min-height:var(--tap);padding:0;background:none;border:0;color:var(--ink-950);font:700 14px var(--font-body);text-decoration:underline;text-underline-offset:4px}
+.tcard footer{display:flex;gap:12px;align-items:center;margin-top:auto;padding-top:20px;border-top:1.5px solid rgba(8,8,9,.22)}
+.tcard .who b{display:block;font-size:15px;line-height:1.3;color:var(--ink-950)}
+.tcard .who small{display:block;font-size:13px;color:rgba(8,8,9,.65);line-height:1.4}
+.tcard .avatar{background:var(--paper);color:var(--ink-950);border-color:rgba(8,8,9,.22)}
+/* motifs */
+.slashes{display:grid;grid-template-rows:repeat(3,1fr);gap:7%;width:min(46vw,420px);aspect-ratio:1.1;pointer-events:none}
+.slashes i{display:block;background:var(--accent-grad);clip-path:polygon(26% 0,100% 0,74% 100%,0 100%)}
+.slashes i:nth-child(1),.slashes i:nth-child(3){margin-left:30%}
+.slashes.dark i{background:var(--ink-950)}
+.slashes.corner{position:absolute;top:8px;right:-24px;width:96px}
+.trace{position:absolute;pointer-events:none;width:min(70%,420px);aspect-ratio:420/110;background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 420 110'%3E%3Cpath d='M-4 12H80L128 96 176 12H256L304 96 352 12H424' fill='none' stroke='%23FFC518' stroke-width='2.5' stroke-linejoin='round' stroke-linecap='round'/%3E%3C/svg%3E") no-repeat center/100% 100%}
+.slashlist li{display:flex;gap:12px;align-items:center;min-height:44px}
+.slashlist li::before{content:"";width:16px;height:12px;flex:none;background:var(--accent-grad);clip-path:polygon(28% 0,100% 0,72% 100%,0 100%)}
+
+/* layout helpers */
+.stack{display:grid;gap:16px}.row{display:flex;flex-wrap:wrap;gap:12px;align-items:center}
+.stack>*{min-width:0}

@@ -1,0 +1,30 @@
+---
+import Icon from './Icon.astro';
+interface Props {
+  id: string; name?: string; label: string;
+  type?: string; value?: string; placeholder?: string;
+  optional?: boolean; hint?: string; error?: string; success?: string;
+  prefix?: string; inputmode?: 'text' | 'numeric' | 'tel' | 'email';
+  autocomplete?: string; required?: boolean; disabled?: boolean; maxlength?: number;
+  multiline?: boolean;
+}
+const { id, name = id, label, type = 'text', value = '', placeholder, optional, hint, error, success, prefix, inputmode, autocomplete, required, disabled, maxlength, multiline } = Astro.props;
+const hintId = hint ? `${id}-hint` : undefined;
+const msgId = error || success ? `${id}-msg` : undefined;
+const describedby = [hintId, msgId].filter(Boolean).join(' ') || undefined;
+const common = { id, name, placeholder, required, disabled, maxlength, autocomplete, 'aria-invalid': error ? 'true' : undefined, 'aria-describedby': describedby };
+---
+<div class:list={['field', error && 'error', !error && success && 'success']}>
+  <label for={id}>{label}{optional && <> <span class="opt">(optional)</span></>}</label>
+  {multiline
+    ? <textarea class="ctl" {...common}>{value}</textarea>
+    : prefix
+      ? <div class="prefix"><span aria-hidden="true">{prefix}</span><input class="ctl" type={type} value={value} inputmode={inputmode} {...common} /></div>
+      : <input class="ctl" type={type} value={value} inputmode={inputmode} {...common} />}
+  {hint && <span class="hint" id={hintId}>{hint}</span>}
+  {(error || success) && (
+    <div class="msg" id={msgId} role={error ? 'alert' : undefined}>
+      <Icon name={error ? 'alert' : 'check-circle'} />{error ?? success}
+    </div>
+  )}
+</div>

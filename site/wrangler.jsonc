@@ -1,0 +1,15 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "akhil-fitness",
+  "compatibility_date": "2026-09-01",
+  "compatibility_flags": ["nodejs_compat"],
+  "main": "./src/worker.ts",
+  // D1: leads + testimonials. database_id is filled in when the real database is created
+  // (wrangler auto-provisions it on first deploy). Local dev uses an on-disk simulator.
+  "d1_databases": [
+    { "binding": "DB", "database_name": "akhil-fitness", "migrations_dir": "migrations" }
+  ],
+  // Retry failed notifications and nudge un-contacted leads (free Cron Triggers).
+  "triggers": { "crons": ["*/10 * * * *"] },
+  "observability": { "enabled": true }
+}

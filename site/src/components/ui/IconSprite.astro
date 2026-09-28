@@ -1,0 +1,40 @@
+---
+// Every icon on the site is an Iconoir icon (https://iconoir.com), read from the iconoir package at build time and
+// emitted once as an SVG sprite. Keys are the ids used across the site (`<use href="#i-<key>">`); values are Iconoir names.
+// Iconoir ships a real "whatsapp" brand mark, so that one is the actual logo, not a generic stand-in.
+import arrowRight from 'iconoir/icons/regular/arrow-right.svg?raw';
+import arrowLeft from 'iconoir/icons/regular/arrow-left.svg?raw';
+import arrowDown from 'iconoir/icons/regular/arrow-down.svg?raw';
+import chevronDown from 'iconoir/icons/regular/nav-arrow-down.svg?raw';
+import plus from 'iconoir/icons/regular/plus.svg?raw';
+import minus from 'iconoir/icons/regular/minus.svg?raw';
+import x from 'iconoir/icons/regular/xmark.svg?raw';
+import check from 'iconoir/icons/regular/check.svg?raw';
+import circleCheck from 'iconoir/icons/regular/check-circle.svg?raw';
+import circleAlert from 'iconoir/icons/regular/warning-circle.svg?raw';
+import info from 'iconoir/icons/regular/info-circle.svg?raw';
+import menu from 'iconoir/icons/regular/menu.svg?raw';
+import whatsapp from 'iconoir/icons/regular/whatsapp.svg?raw';
+import phone from 'iconoir/icons/regular/phone.svg?raw';
+import mail from 'iconoir/icons/regular/mail.svg?raw';
+import mapPin from 'iconoir/icons/regular/map-pin.svg?raw';
+import clock from 'iconoir/icons/regular/clock.svg?raw';
+import calendar from 'iconoir/icons/regular/calendar.svg?raw';
+import upload from 'iconoir/icons/regular/upload.svg?raw';
+import user from 'iconoir/icons/regular/user.svg?raw';
+import openNewWindow from 'iconoir/icons/regular/open-new-window.svg?raw';
+import refreshCircle from 'iconoir/icons/regular/refresh-circle.svg?raw';
+
+const icons: Record<string, string> = {
+  'arrow-right': arrowRight, 'arrow-left': arrowLeft, 'arrow-down': arrowDown, 'chevron-down': chevronDown,
+  plus, minus, close: x, check, 'check-circle': circleCheck, alert: circleAlert, info, menu,
+  whatsapp, phone, mail, location: mapPin, clock, calendar, upload, user,
+  external: openNewWindow, spinner: refreshCircle,
+};
+// Keep only the drawing (the shapes between <svg ...> and </svg>); size/stroke come from the .icon class.
+const inner = (svg: string) => svg.replace(/^[\s\S]*?<svg[^>]*>/, '').replace(/<\/svg>\s*$/, '').trim();
+const sprite = Object.entries(icons)
+  .map(([id, svg]) => `<symbol id="i-${id}" viewBox="0 0 24 24">${inner(svg)}</symbol>`)
+  .join('');
+---
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false"><defs set:html={sprite} /></svg>
