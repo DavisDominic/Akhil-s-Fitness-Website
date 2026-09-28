@@ -2,18 +2,22 @@
 
 /* Hero load-in: plays once immediately on page load (not scroll-triggered — the hero is visible from the first
    frame, so there's nothing to "reveal" on scroll here). backwards fill-mode holds each element at its opacity:0
-   starting keyframe during its own delay, instead of flashing visible then jumping back for the stagger. */
-@keyframes hero-in{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:none}}
-.hero-immersive-pill,.hero-immersive-copy>*,.hero-cta-immersive,.hero-copy>*{animation:hero-in .7s var(--ease) backwards}
+   starting keyframe during its own delay, instead of flashing visible then jumping back for the stagger.
+   Slower and travels further than a typical micro-transition on purpose: the original .7s/18px version finished
+   in well under a second, so anyone who looked at the page even a beat after it loaded — which is normal; nobody
+   stares at the exact instant of first paint — only ever saw the fully-settled end state and read the whole
+   section as static. This one takes ~1.5s end to end and moves 40px, so there's an actual window to catch it. */
+@keyframes hero-in{from{opacity:0;transform:translateY(40px)}to{opacity:1;transform:none}}
+.hero-immersive-pill,.hero-immersive-copy>*,.hero-cta-immersive,.hero-copy>*{animation:hero-in 1s var(--ease) backwards}
 .hero-immersive-pill{animation-delay:0ms}
-.hero-immersive-copy .eyebrow{animation-delay:90ms}
-.hero-immersive-copy .hero-title{animation-delay:160ms}
-.hero-cta-immersive{animation-delay:260ms}
+.hero-immersive-copy .eyebrow{animation-delay:180ms}
+.hero-immersive-copy .hero-title{animation-delay:320ms}
+.hero-cta-immersive{animation-delay:500ms}
 .hero-copy>*:nth-child(1){animation-delay:0ms}
-.hero-copy>*:nth-child(2){animation-delay:90ms}
-.hero-copy>*:nth-child(3){animation-delay:160ms}
-.hero-copy>*:nth-child(4){animation-delay:230ms}
-.hero-copy>*:nth-child(5){animation-delay:300ms}
+.hero-copy>*:nth-child(2){animation-delay:180ms}
+.hero-copy>*:nth-child(3){animation-delay:320ms}
+.hero-copy>*:nth-child(4){animation-delay:460ms}
+.hero-copy>*:nth-child(5){animation-delay:600ms}
 
 /* wordmark: the real logo mark (public/images/logo.png), cropped tight to its own content with the source's
    black background keyed out to transparency — sized by image height, not font-size, since it's a raster mark. */
