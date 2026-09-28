@@ -60,11 +60,17 @@ function animateCount(el: HTMLElement) {
 // or while a finger is down, and resumes right away once nothing is actively moving the scroll position.
 // Resuming is NOT simply "on touchend": a real swipe keeps coasting via the browser's own momentum scrolling
 // well after the finger lifts, and writing scrollLeft ourselves while that's still happening fights/kills the
-// native momentum — which read as the whole thing "freezing" after a swipe. Instead a native 'scroll' listener
-// (which fires for both a manual drag AND its momentum tail) tracks "something is actively scrolling this" and
-// only lets the auto-driver resume a short idle moment after the last of those events — i.e. the instant the
-// swipe (and its momentum) has actually finished, not before. Our own programmatic writes are tagged so they
-// don't re-trigger that same detector. ---
+// native momentum. A native 'scroll' listener (which fires for both a manual drag AND its momentum tail) tracks
+// "something is actively scrolling this" and only lets the auto-driver resume a short idle moment after the
+// last of those events. That detector compares the observed scrollLeft against our own last-written position
+// rather than flagging "the next event is ours to ignore" — on iPhone Safari, scroll events from a drag/
+// momentum can arrive coalesced in ways that let a real swipe slip past a simple flag, which is what let the
+// auto-driver keep nudging scrollLeft forward THROUGH a user's backward swipe (unable to swipe back) and, since
+// nothing was ever pulling the position down from wherever a fast swipe left it, let it reach the true trailing
+// edge of the duplicated content — the dead space of iOS's own rubber-band overscroll past real content, with
+// nothing left to scroll back from. The idle-settle moment now also silently re-wraps the position into
+// [0, half) — invisible, since the two halves are identical content — so neither a swipe nor the auto-driver
+// can ever actually reach that true edge in the first place. ---
 document.querySelectorAll<HTMLElement>('[data-marquee]').forEach((el) => {
   const track = el.querySelector<HTMLElement>('.tcarousel-track');
   if (!track || reduceMotion()) return;
@@ -72,27 +78,29 @@ document.querySelectorAll<HTMLElement>('[data-marquee]').forEach((el) => {
   const SPEED = 45; // px/s
   let paused = false; // hover / focus / finger-down
   let userScrolling = false; // a drag or its momentum is actively moving scrollLeft right now
-  let programmatic = false; // the next 'scroll' event is one WE caused, not the user
   let idleTimer: ReturnType<typeof setTimeout> | undefined;
   let last = performance.now();
   // Our own float accumulator, not re-derived from el.scrollLeft each frame: a per-frame advance at this speed
   // is well under a pixel, and reading a just-written scrollLeft back can hand us a rounded/quantized value —
   // accumulating against THAT silently loses almost the entire increment every frame instead of building up to
-  // real motion. Only resynced from the real scrollLeft after the user actually drags it somewhere themselves.
+  // real motion. Only resynced from the real scrollLeft once the user's drag/momentum has actually settled.
   let pos = el.scrollLeft;
-  let needsResync = false;
+
+  const halfWidth = () => track!.scrollWidth / 2;
+  const wrap = (p: number, half: number) => { const r = p % half; return r < 0 ? r + half : r; };
 
   function tick(now: number) {
-    const dt = now - last;
+    // Clamped so a long background/throttled gap (tab switched away, phone locked) resumes smoothly from
+    // wherever it visually was instead of jumping far ahead to "catch up" for time nobody was watching.
+    const dt = Math.min(now - last, 100);
     last = now;
-    if (userScrolling) {
-      needsResync = true;
-    } else if (!paused) {
-      if (needsResync) { pos = el.scrollLeft; needsResync = false; }
-      const half = track.scrollWidth / 2;
-      pos += (SPEED * dt) / 1000;
-      if (pos >= half) pos -= half;
-      programmatic = true;
+    const half = halfWidth();
+    // track.scrollWidth can still read as 0 on the very first frame or two, before layout has fully settled —
+    // half would be 0, and pos % 0 is NaN, which (unlike a normal out-of-range number) never recovers on its
+    // own once it poisons pos, since NaN propagates through every later frame's arithmetic forever. Skip the
+    // write on any frame where half isn't yet a usable, positive number rather than let that happen.
+    if (!paused && !userScrolling && half > 0) {
+      pos = wrap(pos + (SPEED * dt) / 1000, half);
       el.scrollLeft = pos;
     }
     requestAnimationFrame(tick);
@@ -100,10 +108,19 @@ document.querySelectorAll<HTMLElement>('[data-marquee]').forEach((el) => {
   requestAnimationFrame(tick);
 
   el.addEventListener('scroll', () => {
-    if (programmatic) { programmatic = false; return; }
+    // A scroll event that lands close to where we last wrote pos ourselves is our own write echoing back —
+    // not real user activity. Anything else is a genuine drag or its momentum tail.
+    if (Math.abs(el.scrollLeft - pos) <= 2) return;
     userScrolling = true;
     clearTimeout(idleTimer);
-    idleTimer = setTimeout(() => { userScrolling = false; }, 120);
+    idleTimer = setTimeout(() => {
+      userScrolling = false;
+      const half = halfWidth();
+      if (half > 0) {
+        pos = wrap(el.scrollLeft, half);
+        el.scrollLeft = pos; // no-op if already in range; otherwise an invisible re-centre, not a visible jump
+      }
+    }, 120);
   }, { passive: true });
 
   if (matchMedia('(hover: hover)').matches) {
