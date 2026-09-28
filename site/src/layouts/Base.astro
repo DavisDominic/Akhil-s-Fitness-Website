@@ -43,6 +43,16 @@ const canonical = new URL(Astro.url.pathname, Astro.site);
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <!-- Runs before body content parses, not in src/scripts/motion.ts: the testimonial marquee's duplicated
+         "loop" cards need to be display:none for iOS from this element's very FIRST layout (see the .ios rule
+         in layout.css) — removing them via JS *after* the browser has already committed an initial layout with
+         all of them present risked iOS's scroll container caching stale scroll bounds from that first commit,
+         which read as scrolling into empty space past the real content with nothing there to stop it. -->
+    <script is:inline>
+      if (/iP(hone|od|ad)/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1)) {
+        document.documentElement.classList.add('ios');
+      }
+    </script>
     <title>{title}</title>
     <meta name="description" content={description} />
     <meta name="theme-color" content="#080809" />

@@ -206,6 +206,14 @@
    it's a legacy property modern iOS scrolls smoothly without anyway, and was the other half of that same
    problematic combination. */
 .tcarousel.tcarousel--ios{overflow-x:auto;overflow-y:hidden;scrollbar-width:none;-webkit-mask-image:none;mask-image:none}
+/* html.ios is set by an inline script in Base.astro's <head>, before body content parses — the duplicated
+   "loop" cards (used elsewhere for the auto-advancing loop, see setupTransformDriven in motion.ts) need to be
+   gone from THIS element's very first layout on iOS, not removed by JS after an initial layout already
+   committed them: iOS's scroll container can cache scroll bounds from that first commit, which read as being
+   able to scroll into empty space past the real content with nothing there to ever stop it. src/scripts/
+   motion.ts's setupNativeScroll() also removes them outright as a backup, which is a harmless no-op once this
+   rule has already kept them from ever being laid out to begin with. */
+html.ios .tcarousel-track .tcard[aria-hidden="true"]{display:none}
 .tcarousel.tcarousel--ios::-webkit-scrollbar{display:none}
 .tcarousel.tcarousel--ios .tcarousel-track{touch-action:auto;cursor:auto}
 /* align-items:stretch (inherited from the flex row) is what makes every card match the tallest one — it only
