@@ -210,9 +210,12 @@
 @media(min-width:700px){.tcarousel-track .tcard{flex:0 0 55vw}}
 @media(min-width:1024px){.tcarousel-track{gap:24px}.tcarousel-track .tcard{flex:0 0 400px}}
 .tcard .sample{align-self:flex-start}
-/* Training modality cards: one column always — these are accordions, not a grid of equal-height tiles, so
-   wrapping them into columns would leave neighbouring cards jumping around as siblings open/close. */
+/* Training modality cards: single column on mobile (a 2-up grid would make each row only as tall as its
+   shortest neighbour, cramping the number/title before any card even opens on a narrow phone screen). Two
+   columns from desktop up, where there's room — a pair sharing a grid row grows together when one expands,
+   which reads fine since they're always full accordions, not fixed-height tiles. */
 .train-list{display:grid;gap:16px}
+@media(min-width:1024px){.train-list{grid-template-columns:repeat(2,1fr)}}
 /* The mockup's soft amber glow lives on a WRAPPER, not on .train-card itself — .train-card needs
    overflow:hidden to clip the corner stripe to its rounded corners, and overflow:hidden also clips any
    box-shadow painted on that same element (a shadow is drawn outside the border box, which "hidden" cuts off
