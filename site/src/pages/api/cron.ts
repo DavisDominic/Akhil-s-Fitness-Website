@@ -1,6 +1,7 @@
 import type { APIRoute } from 'astro';
 import { getEnv } from '../../lib/server/env';
 import { runScheduled } from '../../lib/server/leads';
+import { retryFailedTestimonials } from '../../lib/server/testimonials';
 
 export const prerender = false;
 
@@ -10,5 +11,7 @@ export const POST: APIRoute = async ({ request, url }) => {
   if (!env.CRON_SECRET || request.headers.get('x-cron-secret') !== env.CRON_SECRET) return new Response('unauthorized', { status: 401 });
   // `?at=<ISO time>` lets us test the daytime-only reminder and the Monday heartbeat. Ignored outside local stub mode.
   const at = env.DEV_STUBS === '1' ? Date.parse(url.searchParams.get('at') ?? '') : NaN;
-  return new Response(JSON.stringify(await runScheduled(env, Number.isNaN(at) ? {} : { nowMs: at })), { headers: { 'content-type': 'application/json' } });
+  const opts = Number.isNaN(at) ? {} : { nowMs: at };
+  const [leads, retriedTestimonials] = await Promise.all([runScheduled(env, opts), retryFailedTestimonials(env, opts)]);
+  return new Response(JSON.stringify({ ...leads, retriedTestimonials }), { headers: { 'content-type': 'application/json' } });
 };

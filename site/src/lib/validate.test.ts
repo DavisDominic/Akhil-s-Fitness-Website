@@ -1,7 +1,7 @@
 // Run with: npm test   (Node's built-in test runner; no extra dependencies)
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { cleanSociety, cleanSource, normalizeIndianMobile, prettyMobile, validateTrial } from './validate.ts';
+import { cleanSociety, cleanSource, normalizeIndianMobile, prettyMobile, validateTestimonial, validateTrial } from './validate.ts';
 
 test('Indian mobile numbers are accepted in every common format', () => {
   for (const ok of ['9876543210', '98765 43210', '+91 98765-43210', '+919876543210', '919876543210', '09876543210', '091 98765 43210', '(98765) 43210']) {
@@ -63,3 +63,36 @@ test('society slug is sanitised', () => {
 });
 
 test('prettyMobile formats for display', () => assert.equal(prettyMobile('919876543210'), '+91 98765 43210'));
+
+test('validateTestimonial normalises and requires consent', () => {
+  const base = { name: '  Priya   Sharma ', society: 'SJR  Bluewaters', quote: 'Great coaching, highly recommend.', consent: 'on' };
+  const r = validateTestimonial(base);
+  assert.ok(r.ok);
+  if (r.ok) {
+    assert.equal(r.value.name, 'Priya Sharma');
+    assert.equal(r.value.society, 'SJR Bluewaters');
+    assert.equal(r.value.occupation, '');
+  }
+  assert.ok(!validateTestimonial({ ...base, consent: undefined }).ok);
+  assert.ok(!validateTestimonial({ ...base, consent: 'false' }).ok);
+});
+
+test('validateTestimonial accepts a real boolean consent too (client-side read())', () => {
+  const base = { name: 'Priya', society: 'X Society', quote: 'Great coaching, highly recommend.' };
+  assert.ok(validateTestimonial({ ...base, consent: true }).ok);
+  assert.ok(!validateTestimonial({ ...base, consent: false }).ok);
+});
+
+test('validateTestimonial reports every bad field at once', () => {
+  const r = validateTestimonial({ name: '', society: '', quote: 'short', consent: false });
+  assert.ok(!r.ok);
+  if (!r.ok) assert.deepEqual(Object.keys(r.errors).sort(), ['consent', 'name', 'quote', 'society']);
+});
+
+test('validateTestimonial length caps', () => {
+  const base = { name: 'Priya', society: 'X Society', quote: 'Great coaching, highly recommend.', consent: 'on' };
+  assert.ok(validateTestimonial(base).ok);
+  assert.ok(!validateTestimonial({ ...base, name: 'a'.repeat(81) }).ok);
+  assert.ok(!validateTestimonial({ ...base, occupation: 'x'.repeat(81) }).ok);
+  assert.ok(!validateTestimonial({ ...base, quote: 'x'.repeat(1001) }).ok);
+});

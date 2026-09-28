@@ -89,6 +89,44 @@ export function validateTrial(input: Partial<Record<keyof TrialInput, unknown>>)
   };
 }
 
+export interface TestimonialInput {
+  name: string;
+  society: string;
+  occupation?: string;
+  quote: string;
+  consent: boolean;
+}
+export type TestimonialFieldErrors = Partial<Record<keyof TestimonialInput, string>>;
+
+export const TESTIMONIAL_MESSAGES = {
+  name: 'Please enter your name.',
+  society: 'Please enter your apartment or society.',
+  quote: 'Tell us a little about your experience.',
+  consent: 'Please confirm you agree before submitting.',
+} as const;
+
+/** consent arrives as a real boolean from the browser's own read() but as FormData's "on" (checked) or absent
+ * (unchecked) once it reaches the server — both forms mean "checked". */
+const isChecked = (v: unknown) => v === true || v === 'true' || v === 'on';
+
+export function validateTestimonial(input: Partial<Record<keyof TestimonialInput, unknown>>): { ok: true; value: { name: string; society: string; occupation: string; quote: string } } | { ok: false; errors: TestimonialFieldErrors } {
+  const errors: TestimonialFieldErrors = {};
+  const name = collapse(input.name);
+  const society = collapse(input.society);
+  const occupation = collapse(input.occupation);
+  const quote = collapse(input.quote);
+  const consent = isChecked(input.consent);
+
+  if (name.length < 2 || name.length > 80) errors.name = TESTIMONIAL_MESSAGES.name;
+  if (society.length < 2 || society.length > 100) errors.society = TESTIMONIAL_MESSAGES.society;
+  if (occupation.length > 80) errors.occupation = 'Please keep this under 80 characters.';
+  if (quote.length < 10 || quote.length > 1000) errors.quote = TESTIMONIAL_MESSAGES.quote;
+  if (!consent) errors.consent = TESTIMONIAL_MESSAGES.consent;
+
+  if (Object.keys(errors).length) return { ok: false, errors };
+  return { ok: true, value: { name, society, occupation, quote } };
+}
+
 export const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
 /** "+91 98765 43210" for display. */

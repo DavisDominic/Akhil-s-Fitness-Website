@@ -1,6 +1,7 @@
 import type { APIRoute } from 'astro';
 import { getEnv } from '../../lib/server/env';
 import { applyLeadAction, saveTrialTime } from '../../lib/server/leads';
+import { applyTestimonialAction } from '../../lib/server/testimonials';
 import { esc, tg } from '../../lib/server/telegram';
 
 export const prerender = false;
@@ -36,9 +37,11 @@ export const POST: APIRoute = async ({ request }) => {
   const cb = update.callback_query;
   if (cb) {
     if (String(cb.from.id) !== owner || !cb.message) return ok();
-    const m = /^l:([cbn]):([0-9a-f]{32})$/.exec(cb.data ?? '');
+    const lm = /^l:([cbn]):([0-9a-f]{32})$/.exec(cb.data ?? '');
+    const tm = /^t:([ar]):([0-9a-f]{32})$/.exec(cb.data ?? '');
     let toast = 'Unknown action';
-    if (m) toast = await applyLeadAction(env, m[2], m[1] as 'c' | 'b' | 'n', cb.message.chat.id, cb.message.message_id);
+    if (lm) toast = await applyLeadAction(env, lm[2], lm[1] as 'c' | 'b' | 'n', cb.message.chat.id, cb.message.message_id);
+    else if (tm) toast = await applyTestimonialAction(env, tm[2], tm[1] as 'a' | 'r', cb.message.chat.id, cb.message.message_id);
     await tg(env, 'answerCallbackQuery', { callback_query_id: cb.id, text: toast });
     return ok();
   }

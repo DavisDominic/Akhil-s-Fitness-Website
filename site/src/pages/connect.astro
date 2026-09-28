@@ -4,13 +4,11 @@ import Button from '../components/ui/Button.astro';
 import Field from '../components/ui/Field.astro';
 import Chips from '../components/ui/Chips.astro';
 import Consent from '../components/ui/Consent.astro';
-import Upload from '../components/ui/Upload.astro';
 import Alert from '../components/ui/Alert.astro';
 import Icon from '../components/ui/Icon.astro';
 import { site, trialLabel, waGeneral } from '../data/site';
 
 // Copy: PRD §47 (CONNECT). Functional page: no sticky CTA bar (the form is the CTA).
-// STEP 2 = markup and layout only. Submission, validation and the API arrive in steps 3 and 4.
 const calUrl = import.meta.env.PUBLIC_CAL_URL as string | undefined; // set when the Cal.com event exists (addendum §3)
 const goals = ['Weight loss', 'Strength', 'Stamina', 'Mobility', 'General fitness', 'Other'].map((l) => ({ value: l.toLowerCase().replace(/ /g, '-'), label: l }));
 ---
@@ -94,18 +92,18 @@ const goals = ['Weight loss', 'Strength', 'Stamina', 'Mobility', 'General fitnes
       <h2 class="t-h2 mtop-2" id="testi-h">Trained with Akhil? <span>Share your experience.</span></h2>
       <div class="mtop-2"><Alert tone="info" title="Reviewed before it appears">Your testimonial will be reviewed by Akhil before it appears on the website.</Alert></div>
 
-      <form class="form-card mtop-3" method="post" action="/api/testimonial" enctype="multipart/form-data" novalidate data-form="testimonial">
+      <form class="form-card mtop-3" method="post" action="/api/testimonial" novalidate data-form="testimonial">
         <Field id="w-name" name="name" label="Name" placeholder="Your name" autocomplete="name" required />
         <Field id="w-soc" name="society" label="Apartment / Society" placeholder="Your society" autocomplete="off" required />
         <Field id="w-occ" name="occupation" label="Occupation" optional placeholder="Optional" />
         <Field id="w-exp" name="quote" label="Your experience" multiline placeholder="Tell us about your experience training with Akhil." maxlength={1000} required />
-        <Upload id="w-photo" name="photo" />
+        <!-- honeypot: real visitors never see or fill this -->
         <div class="hp" aria-hidden="true"><label>Website<input type="text" name="website" tabindex="-1" autocomplete="off" /></label></div>
         <Consent id="w-consent" name="consent" />
         <Button type="submit" block size="lg" data-track="testimonial-submit">Submit testimonial</Button>
         <p class="form-note">Thank you, this means a lot. You can ask for your testimonial to be removed at any time. <a href="/privacy">Privacy</a>.</p>
-        <div id="testimonial-status" aria-live="polite"></div>
       </form>
+      <div id="testimonial-status" aria-live="polite"></div>
     </div>
   </section>
 
@@ -122,12 +120,5 @@ const goals = ['Weight loss', 'Strength', 'Stamina', 'Mobility', 'General fitnes
   import '../scripts/trial-form';
 </script>
 <script>
-  // Testimonial form: submission is wired in step 4. Until then keep the preview honest instead of posting to a missing route.
-  document.querySelectorAll<HTMLFormElement>('form[data-form="testimonial"]').forEach((f) =>
-    f.addEventListener('submit', (e) => {
-      e.preventDefault();
-      const s = document.getElementById(`${f.dataset.form}-status`);
-      if (s) s.innerHTML = '<div class="alert info"><div><b>Preview only</b><p>Form submission is wired up in the next build step.</p></div></div>';
-    }),
-  );
+  import '../scripts/testimonial-form';
 </script>
