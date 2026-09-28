@@ -67,7 +67,7 @@ function animateCount(el: HTMLElement) {
 // are the only thing moving this element. ---
 document.querySelectorAll<HTMLElement>('[data-marquee]').forEach((el) => {
   const track = el.querySelector<HTMLElement>('.tcarousel-track');
-  if (!track || reduceMotion()) return;
+  if (!track) return;
 
   const SPEED = 45; // px/s
   let paused = false; // hover / focus
@@ -86,7 +86,10 @@ document.querySelectorAll<HTMLElement>('[data-marquee]').forEach((el) => {
     // wherever it visually was instead of jumping far ahead to "catch up" for time nobody was watching.
     const dt = Math.min(now - last, 100);
     last = now;
-    if (!paused && !dragging) {
+    // prefers-reduced-motion only cancels the self-driven autoplay — dragging/swiping is the visitor's own
+    // action, not motion imposed on them, so it stays available regardless (and was wrongly gated on the same
+    // reduceMotion() check as autoplay before, making the whole thing inert for anyone with that preference on).
+    if (!paused && !dragging && !reduceMotion()) {
       const half = halfWidth();
       // track.scrollWidth can still read as 0 on the very first frame or two, before layout has fully settled —
       // half would be 0, and pos % 0 is NaN, which never recovers on its own once it poisons pos, since NaN
@@ -111,14 +114,39 @@ document.querySelectorAll<HTMLElement>('[data-marquee]').forEach((el) => {
   }
   function dragEnd() { dragging = false; }
 
-  el.addEventListener('touchstart', (e) => dragStart(e.touches[0].clientX), { passive: true });
-  el.addEventListener('touchmove', (e) => dragMove(e.touches[0].clientX), { passive: true });
+  // touch-action:pan-y (layout.css) is what's SUPPOSED to leave vertical page-scroll to the browser while this
+  // handles horizontal drags — but touch-action support is inconsistent on older iOS Safari, and a horizontal
+  // drag it doesn't fully honour can also start dragging the whole page sideways. So the gesture's axis is also
+  // decided explicitly here on the first real movement (comparing how far it moved horizontally vs vertically),
+  // and preventDefault() is called for the rest of a horizontal one as a second, CSS-independent line of
+  // defense — never for a vertical one, which must stay free to scroll the page normally.
+  let touchStartY = 0;
+  let axis: 'x' | 'y' | null = null;
+  el.addEventListener('touchstart', (e) => {
+    dragStart(e.touches[0].clientX);
+    touchStartY = e.touches[0].clientY;
+    axis = null;
+  }, { passive: true });
+  el.addEventListener('touchmove', (e) => {
+    const t = e.touches[0];
+    if (axis === null) {
+      const dx = t.clientX - dragStartX, dy = t.clientY - touchStartY;
+      if (Math.abs(dx) < 4 && Math.abs(dy) < 4) return; // not enough movement yet to tell
+      axis = Math.abs(dx) > Math.abs(dy) ? 'x' : 'y';
+      if (axis === 'y') { dragging = false; return; } // hand off to native vertical page scroll entirely
+    }
+    if (axis === 'x') e.preventDefault();
+    dragMove(t.clientX);
+  }, { passive: false });
   el.addEventListener('touchend', dragEnd, { passive: true });
   el.addEventListener('touchcancel', dragEnd, { passive: true });
 
   // Mouse drag, for parity with the trackpad/wheel scroll a native scroll container used to give desktop for free.
+  // The window-level mousemove is guarded on the left button still actually being held (buttons bit 1) — a
+  // dangling `dragging=true` with no matching mouseup (dropped outside the window, a devtools/automation tool
+  // synthesizing its own pointer tracking, etc.) would otherwise silently drag the carousel around forever.
   el.addEventListener('mousedown', (e) => { dragStart(e.clientX); e.preventDefault(); });
-  window.addEventListener('mousemove', (e) => dragMove(e.clientX));
+  window.addEventListener('mousemove', (e) => { if (e.buttons & 1) dragMove(e.clientX); else dragEnd(); });
   window.addEventListener('mouseup', dragEnd);
 
   el.addEventListener('wheel', (e) => {

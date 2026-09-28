@@ -1,7 +1,11 @@
 /* Ported from Design System V5.1 (BASE + type roles). */
 *{box-sizing:border-box}
-html{scroll-behavior:smooth;-webkit-text-size-adjust:100%}
-body{margin:0;background:var(--bg-page);color:var(--text-primary);font:400 var(--fs-md)/1.55 var(--font-body);-webkit-font-smoothing:antialiased}
+html{scroll-behavior:smooth;-webkit-text-size-adjust:100%;overflow-x:hidden}
+/* Safety net, not a fix for any one component: a full-bleed negative-margin element (the testimonial marquee,
+   any future one) only needs to be clipped by its own nearest overflow:hidden ancestor in theory, but older
+   WebKit doesn't always contain an oversized width:max-content child correctly, letting it inflate the page's
+   own scrollable width instead — seen as the whole page gaining a horizontal swipe on an older iOS Safari. */
+body{margin:0;background:var(--bg-page);color:var(--text-primary);font:400 var(--fs-md)/1.55 var(--font-body);-webkit-font-smoothing:antialiased;overflow-x:hidden}
 h1,h2,h3,h4,p,ul,ol,figure{margin:0}
 ul,ol{padding:0;list-style:none}
 a{color:inherit}
