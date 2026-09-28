@@ -53,26 +53,61 @@ function animateCount(el: HTMLElement) {
   requestAnimationFrame(frame);
 }
 
-// --- Testimonial marquee: auto-advances via a plain CSS transform on .tcarousel-track, driven entirely by this
-// script — deliberately NOT a real scrollable element. An earlier version used overflow-x:auto + JS writing
-// scrollLeft so drag/wheel worked "for free", but native scrolling has a real, browser-enforced end; a transform
-// does not. On a real iPhone that native end collided with iOS's own rubber-band overscroll past the (doubled,
-// for seamless wrap) content, and once stuck there no amount of re-wrapping scrollLeft from JS recovered it —
-// confirmed needing a full reload. Owning position as a plain number and painting it via translateX sidesteps
-// that whole class of bug: there is no native scroll boundary to ever reach or fight, so wrapping the number is
-// unconditionally safe. touch-action:pan-y (layout.css) leaves vertical page scrolling to the browser while
-// touchmove here handles the horizontal drag ourselves. Paused while genuinely hovered (gated to devices that
-// actually support hover — a touch tap leaves a "sticky" :hover with nothing to clear it) or while a finger/
-// mouse is down, resuming immediately on release — there's no native momentum to fight anymore either, since we
-// are the only thing moving this element. ---
-// iOS only, per explicit request: keep the loop + swipe, drop the self-driven autoplay entirely there. (Also
-// iPadOS, which reports as "MacIntel" but is touch-capable, unlike a real Mac.)
+// --- Testimonial marquee: two genuinely different mechanisms depending on platform — see setupNativeScroll and
+// setupTransformDriven below for why. isIOS also covers iPadOS, which reports as "MacIntel" but is touch-
+// capable, unlike a real Mac. ---
 const isIOS = /iP(hone|od|ad)/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
 
 document.querySelectorAll<HTMLElement>('[data-marquee]').forEach((el) => {
   const track = el.querySelector<HTMLElement>('.tcarousel-track');
   if (!track) return;
+  if (isIOS) setupNativeScroll(el, track);
+  else setupTransformDriven(el, track);
+});
 
+// The card list is rendered 3x in the markup (index.astro) so there's a full extra copy of buffer on each side
+// of whichever one is "current" — shared by both mechanisms below.
+function loopWidthOf(track: HTMLElement) { return track.scrollWidth / 3; }
+
+// --- iOS: genuine native scrolling (see .tcarousel--ios in layout.css). No autoplay (per explicit request), so
+// there's nothing to fight momentum with — native touch/scroll handling is simply more reliable than any
+// hand-rolled equivalent, and repeated attempts to patch a custom touch/transform implementation for iOS
+// specifically kept surfacing new problems (dead space at the loop seam, non-smooth dragging) rather than
+// fewer. JS here only ever touches scrollLeft once scrolling has fully settled (never mid-gesture, never
+// fighting momentum): if that's landed in the first or third copy, it silently jumps by exactly one loop-width
+// into the equivalent spot in the middle copy — invisible, since all three copies are pixel-identical. ---
+function setupNativeScroll(el: HTMLElement, track: HTMLElement) {
+  el.classList.add('tcarousel--ios');
+  let idleTimer: ReturnType<typeof setTimeout> | undefined;
+
+  function recentre() {
+    const lw = loopWidthOf(track);
+    if (lw <= 0) return;
+    // A loop, not a single if/else: realistically only ever runs once (a single settled scroll can't drift more
+    // than about a screen's width, well under one lw), but a loop costs nothing and stays correct regardless.
+    while (el.scrollLeft < lw * 0.5) el.scrollLeft += lw;
+    while (el.scrollLeft > lw * 1.5) el.scrollLeft -= lw;
+  }
+
+  function start() {
+    const lw = loopWidthOf(track);
+    if (lw <= 0) { requestAnimationFrame(start); return; } // layout not settled yet — try again next frame
+    el.scrollLeft = lw; // begin in the middle copy, so there's a full copy's worth of room either direction
+  }
+  requestAnimationFrame(start);
+
+  el.addEventListener('scroll', () => {
+    clearTimeout(idleTimer);
+    idleTimer = setTimeout(recentre, 150);
+  }, { passive: true });
+}
+
+// --- Non-iOS (desktop, Android): auto-advances via a plain CSS transform on .tcarousel-track, driven entirely
+// by this script — deliberately NOT a real scrollable element, since a native scroll container's momentum
+// fights a continuously-writing autoplay driver (see the iOS branch above for why that's a real problem there).
+// Paused while genuinely hovered (gated to devices that actually support hover — a touch tap leaves a "sticky"
+// :hover with nothing to clear it) or while a finger/mouse is down, resuming immediately on release. ---
+function setupTransformDriven(el: HTMLElement, track: HTMLElement) {
   const SPEED = 45; // px/s
   let paused = false; // hover / focus
   let dragging = false;
@@ -81,9 +116,8 @@ document.querySelectorAll<HTMLElement>('[data-marquee]').forEach((el) => {
   let last = performance.now();
   let pos = 0;
 
-  const halfWidth = () => track!.scrollWidth / 2;
-  const wrap = (p: number, half: number) => { const r = p % half; return r < 0 ? r + half : r; };
-  const render = () => { track!.style.transform = `translateX(${-pos}px)`; };
+  const wrap = (p: number, lw: number) => { const r = p % lw; return r < 0 ? r + lw : r; };
+  const render = () => { track.style.transform = `translateX(${-pos}px)`; };
 
   function tick(now: number) {
     // Clamped so a long background/throttled gap (tab switched away, phone locked) resumes smoothly from
@@ -91,14 +125,13 @@ document.querySelectorAll<HTMLElement>('[data-marquee]').forEach((el) => {
     const dt = Math.min(now - last, 100);
     last = now;
     // prefers-reduced-motion only cancels the self-driven autoplay — dragging/swiping is the visitor's own
-    // action, not motion imposed on them, so it stays available regardless (and was wrongly gated on the same
-    // reduceMotion() check as autoplay before, making the whole thing inert for anyone with that preference on).
-    if (!paused && !dragging && !reduceMotion() && !isIOS) {
-      const half = halfWidth();
+    // action, not motion imposed on them, so it stays available regardless.
+    if (!paused && !dragging && !reduceMotion()) {
+      const lw = loopWidthOf(track);
       // track.scrollWidth can still read as 0 on the very first frame or two, before layout has fully settled —
-      // half would be 0, and pos % 0 is NaN, which never recovers on its own once it poisons pos, since NaN
-      // propagates through every later frame's arithmetic forever. Skip the write until half is usable.
-      if (half > 0) { pos = wrap(pos + (SPEED * dt) / 1000, half); render(); }
+      // lw would be 0, and pos % 0 is NaN, which never recovers on its own once it poisons pos, since NaN
+      // propagates through every later frame's arithmetic forever. Skip the write until lw is usable.
+      if (lw > 0) { pos = wrap(pos + (SPEED * dt) / 1000, lw); render(); }
     }
     requestAnimationFrame(tick);
   }
@@ -115,61 +148,32 @@ document.querySelectorAll<HTMLElement>('[data-marquee]').forEach((el) => {
     // isn't perfectly monotonic; if the raw value happens to hover right at the wrap boundary, wrapping on
     // every touchmove could flip the result between two very different-looking positions frame to frame from
     // ordinary sub-pixel jitter, which read as the carousel "wriggling". A CSS transform has no problem with a
-    // value outside [0, half) for the short, bounded span of a single drag gesture.
+    // value outside [0, lw) for the short, bounded span of a single drag gesture.
     pos = dragStartPos - (clientX - dragStartX);
     render();
   }
   function dragEnd() {
     dragging = false;
-    const half = halfWidth();
-    if (half > 0) pos = wrap(pos, half); // bring it back in range now that nothing is actively rendering it
+    const lw = loopWidthOf(track);
+    if (lw > 0) pos = wrap(pos, lw); // bring it back in range now that nothing is actively rendering it
   }
 
-  // touch-action:pan-y (layout.css) is what's SUPPOSED to leave vertical page-scroll to the browser while this
-  // handles horizontal drags — but touch-action support is inconsistent on older iOS Safari, and a horizontal
-  // drag it doesn't fully honour can also start dragging the whole page sideways. So the gesture's axis is also
-  // decided explicitly here on the first real movement (comparing how far it moved horizontally vs vertically),
-  // and preventDefault() is called for the rest of a horizontal one as a second, CSS-independent line of
-  // defense — never for a vertical one, which must stay free to scroll the page normally.
-  let touchStartY = 0;
-  let axis: 'x' | 'y' | null = null;
-  let lastTouchAt = 0;
-  el.addEventListener('touchstart', (e) => {
-    lastTouchAt = Date.now();
-    dragStart(e.touches[0].clientX);
-    touchStartY = e.touches[0].clientY;
-    axis = null;
-  }, { passive: true });
-  el.addEventListener('touchmove', (e) => {
-    lastTouchAt = Date.now();
-    const t = e.touches[0];
-    if (axis === null) {
-      const dx = t.clientX - dragStartX, dy = t.clientY - touchStartY;
-      if (Math.abs(dx) < 4 && Math.abs(dy) < 4) return; // not enough movement yet to tell
-      axis = Math.abs(dx) > Math.abs(dy) ? 'x' : 'y';
-      if (axis === 'y') { dragging = false; return; } // hand off to native vertical page scroll entirely
-    }
-    if (axis === 'x') e.preventDefault();
-    dragMove(t.clientX);
-  }, { passive: false });
-  el.addEventListener('touchend', () => { lastTouchAt = Date.now(); dragEnd(); }, { passive: true });
-  el.addEventListener('touchcancel', () => { lastTouchAt = Date.now(); dragEnd(); }, { passive: true });
+  el.addEventListener('touchstart', (e) => dragStart(e.touches[0].clientX), { passive: true });
+  el.addEventListener('touchmove', (e) => dragMove(e.touches[0].clientX), { passive: true });
+  el.addEventListener('touchend', dragEnd, { passive: true });
+  el.addEventListener('touchcancel', dragEnd, { passive: true });
 
-  // Mouse drag, for parity with the trackpad/wheel scroll a native scroll container used to give desktop for
-  // free. iOS Safari synthesizes compatibility mousedown/mousemove/mouseup events roughly 300ms after a REAL
-  // tap (a long-standing WebKit behaviour, unrelated to any hover check) — without lastTouchAt, that synthetic
-  // mousedown set dragging=true with no real mouseup ever coming to clear it, permanently blocking autoplay
-  // from ever resuming on a touch device. Ignore any mouse event arriving within a second of real touch input.
-  el.addEventListener('mousedown', (e) => { if (Date.now() - lastTouchAt < 1000) return; dragStart(e.clientX); e.preventDefault(); });
+  // Mouse drag, for parity with the trackpad/wheel scroll a native scroll container used to give desktop for free.
+  el.addEventListener('mousedown', (e) => { dragStart(e.clientX); e.preventDefault(); });
   window.addEventListener('mousemove', (e) => { if (e.buttons & 1) dragMove(e.clientX); else dragEnd(); });
   window.addEventListener('mouseup', dragEnd);
 
   el.addEventListener('wheel', (e) => {
     if (Math.abs(e.deltaX) <= Math.abs(e.deltaY)) return; // clearly vertical page-scroll intent — ignore
     e.preventDefault();
-    const half = halfWidth();
-    if (half <= 0) return;
-    pos = wrap(pos + e.deltaX, half);
+    const lw = loopWidthOf(track);
+    if (lw <= 0) return;
+    pos = wrap(pos + e.deltaX, lw);
     render();
   }, { passive: false });
 
@@ -184,10 +188,10 @@ document.querySelectorAll<HTMLElement>('[data-marquee]').forEach((el) => {
   // automatically anymore, so it's reimplemented here to keep the tabindex/role on this element meaningful.
   el.addEventListener('keydown', (e) => {
     if (e.key !== 'ArrowLeft' && e.key !== 'ArrowRight') return;
-    const half = halfWidth();
-    if (half <= 0) return;
-    pos = wrap(pos + (e.key === 'ArrowRight' ? 80 : -80), half);
+    const lw = loopWidthOf(track);
+    if (lw <= 0) return;
+    pos = wrap(pos + (e.key === 'ArrowRight' ? 80 : -80), lw);
     render();
     e.preventDefault();
   });
-});
+}
