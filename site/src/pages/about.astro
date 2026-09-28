@@ -23,11 +23,11 @@ const whyTrainer = [
 >
   <section class="section flush" aria-labelledby="about-h" style="padding-top:var(--sp-9)">
     <div class="container split">
-      <div class="span-4 span-8-md span-7-lg">
+      <div class="span-4 span-8-md span-7-lg reveal">
         <h1 class="t-h1" id="about-h">Build fitness <span>you can keep.</span></h1>
         <p class="t-lead mtop-3 narrow">The goal isn’t to make you depend on a trainer forever. It’s to help you build better habits, understand your training and become more consistent over time.</p>
       </div>
-      <figure class="portrait span-4 span-8-md span-5-lg">
+      <figure class="portrait span-4 span-8-md span-5-lg reveal" style="transition-delay:120ms">
         <img
           src="/images/akhil-portrait-816.webp"
           srcset="/images/akhil-portrait-480.webp 480w, /images/akhil-portrait-816.webp 816w"
@@ -45,11 +45,11 @@ const whyTrainer = [
        beats that actually explain who he is and why he trains the way he does. -->
   <section class="section" aria-labelledby="story-h">
     <div class="container two">
-      <div>
+      <div class="reveal">
         <p class="eyebrow">Akhil’s story</p>
         <h2 class="t-h2 mtop-2" id="story-h">I’ve started from zero <span>more than once.</span></h2>
       </div>
-      <div>
+      <div class="reveal" style="transition-delay:80ms">
         <p class="t-lead narrow">Fitness has been part of my life since I was a kid — always active, always moving. I started training seriously at 16, competed, and won my first competition. Then an accident took my strength away almost overnight, and I had to rebuild from zero. It’s the hardest lesson I’ve learned: starting over is hard, and everyone starts from a different place.</p>
         <p class="t-lead mtop-3 narrow">That’s why personal training, done properly, isn’t one-size-fits-all. It’s understanding your body and your life first, then building training around that — the same way I had to rebuild mine.</p>
       </div>
@@ -58,14 +58,14 @@ const whyTrainer = [
 
   <section class="section" aria-labelledby="why-h">
     <div class="container two">
-      <div>
+      <div class="reveal">
         <p class="eyebrow">Why invest in a trainer</p>
         <h2 class="t-h2 mtop-2" id="why-h">There’s more to fitness <span>than just exercise.</span></h2>
         <p class="t-lead mtop-2 narrow">Anyone can go to a gym and work out. A trainer’s job is different.</p>
       </div>
       <ol class="steps why-steps">
         {whyTrainer.map(([t, d], i) => (
-          <li class="step"><span class="no">{String(i + 1).padStart(2, '0')}</span><div><h3 class="t-h4">{t}</h3><p>{d}</p></div></li>
+          <li class="step reveal" style={`transition-delay:${Math.min(i, 4) * 60}ms`}><span class="no">{String(i + 1).padStart(2, '0')}</span><div><h3 class="t-h4">{t}</h3><p>{d}</p></div></li>
         ))}
       </ol>
     </div>
@@ -73,7 +73,7 @@ const whyTrainer = [
 
   <section class="section" aria-labelledby="exp-h">
     <div class="container">
-      <div class="sec-head"><h2 class="t-h2" id="exp-h">Built through <span>hours of coaching.</span></h2></div>
+      <div class="sec-head reveal"><h2 class="t-h2" id="exp-h">Built through <span>hours of coaching.</span></h2></div>
       <Metrics />
     </div>
   </section>

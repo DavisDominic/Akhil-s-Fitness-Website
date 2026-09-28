@@ -134,16 +134,16 @@ const faq = [
        so its accent panel can bleed full-width edge to edge on mobile the way the mockup shows. -->
   <section class="section phil-section" aria-labelledby="phil-h">
     <div class="container phil-inner">
-      <h2 class="t-h1 wide" id="phil-h">Fitness shouldn’t be something you keep <span>starting over.</span></h2>
-      <div class="mtop-4 wide">
+      <h2 class="t-h1 wide reveal" id="phil-h">Fitness shouldn’t be something you keep <span>starting over.</span></h2>
+      <div class="mtop-4 wide reveal" style="transition-delay:80ms">
         <p class="t-lead phil-lead">Akhil’s approach is about making fitness a consistent part of everyday life.</p>
         <p class="t-lead phil-lead mtop-3 yellow">Build it. Keep it.</p>
       </div>
     </div>
     <div class="phil-stats">
       <div class="container">
-        <p class="phil-stats-label">Why train with Akhil</p>
-        <div class="phil-stats-row">
+        <p class="phil-stats-label reveal">Why train with Akhil</p>
+        <div class="phil-stats-row reveal" style="transition-delay:80ms">
           {site.metrics.map((m) => <div><b>{m.value}</b><span>{m.short}</span></div>)}
         </div>
       </div>
@@ -156,12 +156,12 @@ const faq = [
        bullet list is the only part that <details> hides until opened. -->
   <section class="section" aria-labelledby="value-h">
     <div class="container">
-      <div class="sec-head">
+      <div class="sec-head reveal">
         <h2 class="t-h2" id="value-h">What training with Akhil <span>looks like.</span></h2>
       </div>
       <div class="train-list">
         {training.map(([t, items], i) => (
-          <div class="train-card-wrap">
+          <div class="train-card-wrap reveal" style={`transition-delay:${Math.min(i, 4) * 60}ms`}>
             <details class="card train-card">
               <summary class="train-summary">
                 <img src="/images/stripe-corner.svg" class="train-stripes" alt="" aria-hidden="true" />
@@ -172,9 +172,11 @@ const faq = [
                 </span>
                 <span class="train-rule"></span>
               </summary>
-              <ul class="train-body">
-                {items.map((it) => <li>{it}</li>)}
-              </ul>
+              <div class="train-body-wrap">
+                <ul class="train-body">
+                  {items.map((it) => <li>{it}</li>)}
+                </ul>
+              </div>
             </details>
           </div>
         ))}
@@ -185,9 +187,14 @@ const faq = [
   <!-- PROOF (sample cards until real, consented testimonials are connected in step 4) -->
   <section class="section" aria-labelledby="proof-h">
     <div class="container">
-      <div class="sec-head"><h2 class="t-h2" id="proof-h">Real people. <span>Real progress.</span></h2></div>
-      <div class="tcarousel">
-        {sampleTestimonials.map((t) => <TestimonialCard t={t} />)}
+      <div class="sec-head reveal"><h2 class="t-h2" id="proof-h">Real people. <span>Real progress.</span></h2></div>
+      <div class="tcarousel" data-marquee>
+        <div class="tcarousel-track">
+          {sampleTestimonials.map((t) => <TestimonialCard t={t} />)}
+          <div aria-hidden="true" style="display:contents">
+            {sampleTestimonials.map((t) => <TestimonialCard t={t} />)}
+          </div>
+        </div>
       </div>
     </div>
   </section>
@@ -198,10 +205,10 @@ const faq = [
   <!-- FAQ: objection clean-up, lighter visual weight -->
   <section class="section" aria-labelledby="faq-h">
     <div class="container two">
-      <h2 class="t-h2" id="faq-h">Questions, answered.</h2>
+      <h2 class="t-h2 reveal" id="faq-h">Questions, answered.</h2>
       <div class="faq">
         {faq.map(([q, a]) => (
-          <details><summary>{q}<Icon name="plus" /></summary><div class="ans">{a}</div></details>
+          <details><summary>{q}<Icon name="plus" /></summary><div class="ans-wrap"><div class="ans">{a}</div></div></details>
         ))}
       </div>
     </div>

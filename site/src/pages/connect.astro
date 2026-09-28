@@ -20,7 +20,7 @@ const goals = ['Weight loss', 'Strength', 'Stamina', 'Mobility', 'General fitnes
   <section class="section flush" style="padding-top:var(--sp-9)">
     <div class="container split top">
       <!-- FREE TRIAL FORM (primary) -->
-      <div class="span-4 span-8-md span-5-lg connect-intro">
+      <div class="span-4 span-8-md span-5-lg connect-intro reveal">
         <p class="eyebrow">Free trial</p>
         <h2 class="t-h2 mtop-2">Start with a session.</h2>
       </div>
@@ -88,8 +88,10 @@ const goals = ['Weight loss', 'Strength', 'Stamina', 'Mobility', 'General fitnes
   <!-- TESTIMONIAL FORM (tertiary) -->
   <section class="section" id="testimonial" aria-labelledby="testi-h">
     <div class="container" style="max-width:720px;margin-inline:auto">
-      <p class="eyebrow">Testimonial</p>
-      <h2 class="t-h2 mtop-2" id="testi-h">Trained with Akhil? <span>Share your experience.</span></h2>
+      <div class="reveal">
+        <p class="eyebrow">Testimonial</p>
+        <h2 class="t-h2 mtop-2" id="testi-h">Trained with Akhil? <span>Share your experience.</span></h2>
+      </div>
       <div class="mtop-2"><Alert tone="info" title="Reviewed before it appears">Your testimonial will be reviewed by Akhil before it appears on the website.</Alert></div>
 
       <form class="form-card mtop-3" method="post" action="/api/testimonial" novalidate data-form="testimonial">

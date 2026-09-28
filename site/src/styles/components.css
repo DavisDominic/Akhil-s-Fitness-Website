@@ -2,11 +2,16 @@
 .icon{width:24px;height:24px;flex:none;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
 .icon.sm{width:20px;height:20px}
 /* buttons */
-.btn{--h:52px;min-height:var(--h);padding:0 22px;border-radius:var(--r-sm);border:1.5px solid transparent;display:inline-flex;align-items:center;justify-content:center;gap:10px;font:700 16px/1.1 var(--font-body);letter-spacing:-.005em;text-decoration:none;white-space:nowrap;transition:background var(--dur-fast) var(--ease),border-color var(--dur-fast) var(--ease),color var(--dur-fast) var(--ease),transform var(--dur-fast) var(--ease);background:none}
+.btn{--h:52px;min-height:var(--h);padding:0 22px;border-radius:var(--r-sm);border:1.5px solid transparent;display:inline-flex;align-items:center;justify-content:center;gap:10px;font:700 16px/1.1 var(--font-body);letter-spacing:-.005em;text-decoration:none;white-space:nowrap;transition:background var(--dur-fast) var(--ease),border-color var(--dur-fast) var(--ease),color var(--dur-fast) var(--ease),transform var(--dur-fast) var(--ease),box-shadow var(--dur-fast) var(--ease);background:none}
 .btn.sm{--h:44px;padding:0 16px;font-size:15px}.btn.lg{--h:60px;padding:0 28px}.btn.wide{width:100%}
+/* A small lift on hover, settling back down on press — layered on top of each variant's own color change below,
+   not replacing it. Skipped for disabled/busy buttons (nothing to invite a click toward) and for icon-only FABs,
+   which already get their own press-scale via .fab:active. */
+.btn:not([disabled]):not(.is-disabled):hover{transform:translateY(-2px);box-shadow:var(--shadow-1)}
+.btn:not([disabled]):not(.is-disabled):active{transform:translateY(0);box-shadow:none}
 .btn.primary{background:var(--accent-500);color:var(--ink-950)}
 .btn.primary:hover,.btn.primary.is-hover{background:var(--accent-400)}
-.btn.primary:active{background:var(--accent-600);transform:translateY(1px)}
+.btn.primary:active{background:var(--accent-600)}
 .btn.secondary{border-color:var(--border-control);color:var(--paper)}
 .btn.secondary:hover,.btn.secondary.is-hover{border-color:var(--accent-500);color:var(--accent-500)}
 .btn.ghost{padding-inline:10px;color:var(--ink-200)}.btn.ghost:hover{color:var(--accent-500)}
@@ -46,7 +51,8 @@ textarea.ctl{min-height:132px;resize:vertical}
 .chip input{position:absolute;opacity:0;inset:0;width:100%;height:100%;margin:0;cursor:pointer}
 .chip span{display:inline-flex;align-items:center;gap:8px;min-height:var(--tap);padding:0 16px;border-radius:var(--r-pill);border:1.5px solid var(--border-control);font-weight:600;font-size:18px;transition:all var(--dur-fast)}
 .chip span .icon{width:18px;height:18px;display:none}
-.chip:hover span{border-color:var(--accent-500)}
+.chip:hover span{border-color:var(--accent-500);transform:translateY(-1px)}
+.chip:active span{transform:translateY(0)}
 .chip input:checked+span{background:var(--accent-500);border-color:var(--accent-500);color:var(--ink-950)}
 .chip input:checked+span .icon{display:block}
 .chip input:focus-visible+span{outline:3px solid var(--focus);outline-offset:3px}
@@ -91,7 +97,12 @@ textarea.ctl{min-height:132px;resize:vertical}
 .faq summary .icon{color:var(--accent-500);transition:transform var(--dur-base) var(--ease)}
 .faq details[open] summary .icon{transform:rotate(45deg)}
 .faq details[open] summary{color:var(--accent-500)}
-.faq .ans{padding:0 40px 20px 0;color:var(--text-secondary);font-size:15px}
+/* Smooth expand/collapse via an animated grid row (0fr → 1fr), not <details>'s native instant hide/show — see
+   the matching .train-body-wrap comment in layout.css for why an unconditional display:grid here is enough to
+   override the browser's own default. */
+.faq .ans-wrap{display:grid;grid-template-rows:0fr;transition:grid-template-rows var(--dur-base) var(--ease)}
+.faq details[open] .ans-wrap{grid-template-rows:1fr}
+.faq .ans{padding:0 40px 20px 0;color:var(--text-secondary);font-size:15px;overflow:hidden}
 /* steps */
 .steps{display:grid}
 .step{display:grid;grid-template-columns:48px 1fr;gap:12px;padding:18px 0;border-bottom:1px solid var(--border-subtle)}

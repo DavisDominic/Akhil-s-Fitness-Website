@@ -1,5 +1,20 @@
 /* Site shell + section patterns (adapted from Design System V5.1 §07–08). */
 
+/* Hero load-in: plays once immediately on page load (not scroll-triggered — the hero is visible from the first
+   frame, so there's nothing to "reveal" on scroll here). backwards fill-mode holds each element at its opacity:0
+   starting keyframe during its own delay, instead of flashing visible then jumping back for the stagger. */
+@keyframes hero-in{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:none}}
+.hero-immersive-pill,.hero-immersive-copy>*,.hero-cta-immersive,.hero-copy>*{animation:hero-in .7s var(--ease) backwards}
+.hero-immersive-pill{animation-delay:0ms}
+.hero-immersive-copy .eyebrow{animation-delay:90ms}
+.hero-immersive-copy .hero-title{animation-delay:160ms}
+.hero-cta-immersive{animation-delay:260ms}
+.hero-copy>*:nth-child(1){animation-delay:0ms}
+.hero-copy>*:nth-child(2){animation-delay:90ms}
+.hero-copy>*:nth-child(3){animation-delay:160ms}
+.hero-copy>*:nth-child(4){animation-delay:230ms}
+.hero-copy>*:nth-child(5){animation-delay:300ms}
+
 /* wordmark: the real logo mark (public/images/logo.png), cropped tight to its own content with the source's
    black background keyed out to transparency — sized by image height, not font-size, since it's a raster mark. */
 .wordmark{display:inline-flex;align-items:center;text-decoration:none}
@@ -55,6 +70,7 @@
 .fabs{position:fixed;right:calc(var(--gutter) + env(safe-area-inset-right));bottom:calc(20px + env(safe-area-inset-bottom));z-index:var(--z-sticky);display:flex;flex-direction:column;align-items:center;gap:12px;transition:transform var(--dur-base) var(--ease),visibility var(--dur-base)}
 .fabs.is-hidden{transform:translateY(calc(100% + 20px));visibility:hidden}
 .fab{--s:60px;width:var(--s);height:var(--s);border-radius:50%;display:grid;place-items:center;flex:none;box-shadow:var(--shadow-2);transition:transform var(--dur-fast) var(--ease)}
+.fab:hover{transform:translateY(-3px)}
 .fab:active{transform:scale(.94)}
 .fab .icon{width:26px;height:26px}
 .fab-primary{--s:64px;background:var(--accent-500);color:var(--ink-950)}
@@ -162,19 +178,33 @@
 .metrics .metric b{display:block;font:800 40px/1 var(--font-display);color:var(--accent-500)}
 .metrics .metric span{display:block;margin-top:4px;font:500 16px/1.4 var(--font-body);color:var(--text-secondary)}
 @media(min-width:700px){.metrics .metric b{font-size:clamp(40px,6vw,48px)}}
-/* Horizontal, swipeable carousel (not a wrapping grid): snap-scrolled one-card-at-a-time on mobile, with the next
-   card peeking in at the edge; wider tiers show more of that peek as the card's own flex-basis shrinks. Native
-   scroll-snap needs no JS for swipe/keyboard/trackpad scrolling. Scrollbar hidden (still fully operable via touch/
-   trackpad/arrow-key scroll) since a visible horizontal scrollbar under a card row reads as a stray UI element,
-   not a control anyone here is expected to drag. */
-/* align-items:stretch (the flex default, made explicit here) is what makes every card match the tallest one in
-   the row — it only works because .tcard itself has no explicit height; a shorter quote's card gets stretched
-   to fill that height, and its footer's margin-top:auto absorbs the extra space above the avatar row. */
-.tcarousel{display:flex;align-items:stretch;gap:16px;overflow-x:auto;scroll-snap-type:x mandatory;scroll-padding-left:var(--gutter);margin:0 calc(var(--gutter) * -1);padding:4px var(--gutter);scrollbar-width:none}
-.tcarousel::-webkit-scrollbar{display:none}
-.tcarousel>*{flex:0 0 85%;scroll-snap-align:start;min-width:0}
-@media(min-width:700px){.tcarousel>*{flex:0 0 60%}}
-@media(min-width:1024px){.tcarousel{gap:24px}.tcarousel>*{flex:0 0 400px}}
+/* Continuously drifting marquee, not a swipeable carousel: the card list is rendered twice back to back (the
+   second copy is aria-hidden, purely visual) and the whole track animates from translateX(0) to translateX(-50%)
+   — exactly one full copy's width — on an infinite loop, so it wraps with no visible seam or reset-snap. Paused
+   on hover/focus (mouse/keyboard) via CSS alone, and on touch via src/scripts/motion.ts (touch devices have no
+   hover state, so a finger tap pauses it for a few seconds instead). The container clips + edge-fades the track;
+   it no longer scrolls itself. prefers-reduced-motion freezes it via the global animation override in base.css
+   (iteration-count:1, near-zero duration) rather than a separate rule here. */
+.tcarousel{overflow:hidden;margin:0 calc(var(--gutter) * -1);padding:4px 0;-webkit-mask-image:linear-gradient(to right,transparent,#000 var(--gutter),#000 calc(100% - var(--gutter)),transparent);mask-image:linear-gradient(to right,transparent,#000 var(--gutter),#000 calc(100% - var(--gutter)),transparent)}
+.tcarousel-track{display:flex;align-items:stretch;gap:16px;width:max-content;animation:marquee 42s linear infinite}
+.tcarousel:hover .tcarousel-track,.tcarousel:focus-within .tcarousel-track,.tcarousel.is-paused .tcarousel-track{animation-play-state:paused}
+@keyframes marquee{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+/* align-items:stretch (inherited from the flex row) is what makes every card match the tallest one — it only
+   works because .tcard itself has no explicit height; a shorter quote's card gets stretched to fill that height,
+   and its footer's margin-top:auto absorbs the extra space above the avatar row. */
+/* Sized in vw, not a flex-basis percentage: the track's own width is max-content (it has to be, so it can hold
+   two full copies back to back and still be measurable for the -50% loop), so a percentage flex-basis has
+   nothing stable to resolve against — the child and the container would each be sizing off the other, which
+   is exactly the circular case that made every card blow out to its full max-content width (~15,000px) instead
+   of a normal card width. vw sizes each card off the viewport instead, sidestepping that circularity entirely. */
+/* Targets .tcard itself (a descendant selector), not ">*" (direct children only) — the second, duplicated set
+   of cards sits one level deeper, inside a display:contents wrapper (so it still lays out as a flat run of flex
+   items, but it's still a real element in the DOM tree, which is what ">*" cares about). ">*" only ever matched
+   the first set and the wrapper div itself, leaving the duplicated cards with no flex-basis at all — each one
+   defaulted to its own unconstrained content width instead, which is what made the track balloon out again. */
+.tcarousel-track .tcard{flex:0 0 82vw;min-width:0}
+@media(min-width:700px){.tcarousel-track .tcard{flex:0 0 55vw}}
+@media(min-width:1024px){.tcarousel-track{gap:24px}.tcarousel-track .tcard{flex:0 0 400px}}
 .tcard .sample{align-self:flex-start}
 /* Training modality cards: one column always — these are accordions, not a grid of equal-height tiles, so
    wrapping them into columns would leave neighbouring cards jumping around as siblings open/close. */
@@ -211,7 +241,13 @@
 .train-card[open] .train-chev{transform:rotate(180deg)}
 .train-card[open] .train-no,.train-card[open] .train-row h3{color:var(--accent-500)}
 .train-rule{display:block;border-top:1px solid var(--border-subtle)}
-.train-body{position:relative;z-index:1;padding:0 24px 24px;display:grid;gap:14px}
+/* Smooth expand/collapse: <details> itself has no animatable open/closed state, so the collapsible part lives in
+   a grid row that's animated between 0fr and 1fr instead — an author stylesheet rule always beats the browser's
+   own "hide everything but summary while closed" default (origin order, not specificity), so forcing this
+   wrapper to stay display:grid at all times is enough to take over from the native instant hide/show. */
+.train-body-wrap{display:grid;grid-template-rows:0fr;transition:grid-template-rows var(--dur-base) var(--ease)}
+.train-card[open] .train-body-wrap{grid-template-rows:1fr}
+.train-body{position:relative;z-index:1;padding:0 24px 24px;display:grid;gap:14px;overflow:hidden}
 .train-body li{position:relative;padding-left:20px;color:var(--text-secondary);font:500 16px/1.55 var(--font-body)}
 .train-body li::before{content:"";position:absolute;left:0;top:.55em;width:7px;height:7px;border-radius:50%;background:var(--accent-500)}
 
