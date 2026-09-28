@@ -77,7 +77,10 @@ function loopWidthOf(track: HTMLElement) { return track.scrollWidth / 3; }
 // custom repositioning logic left to get wrong. ---
 function setupNativeScroll(el: HTMLElement, track: HTMLElement) {
   el.classList.add('tcarousel--ios');
-  track.querySelectorAll<HTMLElement>('.tcard[aria-hidden="true"]').forEach((c) => { c.style.display = 'none'; });
+  // .remove() outright, not display:none — the duplicates still being present in the DOM (even invisible) is
+  // one more way iOS's scroll-container content size could end up not matching what's actually on screen. An
+  // element that's gone can't contribute to scrollWidth in any browser, no ambiguity possible.
+  track.querySelectorAll<HTMLElement>('.tcard[aria-hidden="true"]').forEach((c) => c.remove());
 }
 
 // --- Non-iOS (desktop, Android): auto-advances via a plain CSS transform on .tcarousel-track, driven entirely
