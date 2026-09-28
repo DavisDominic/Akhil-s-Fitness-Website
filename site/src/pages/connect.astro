@@ -32,7 +32,7 @@ const goals = ['Weight loss', 'Strength', 'Stamina', 'Mobility', 'General fitnes
           <Field id="t-soc" name="society" label="Apartment / Society" placeholder="Your society name" autocomplete="off" required />
           <Field id="t-occ" name="occupation" label="Occupation" optional placeholder="e.g. Software engineer" />
           <Chips name="goal" label="What would you most like to work on?" options={goals} required />
-          <div class="field" id="goal-other" hidden>
+          <div class="field" id="goal-other">
             <label for="t-goal-other">Tell us more <span class="opt">(optional)</span></label>
             <input class="ctl" id="t-goal-other" name="goalOther" maxlength="120" placeholder="e.g. Getting back to running" />
           </div>

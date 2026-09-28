@@ -275,6 +275,11 @@
 
 /* connect */
 .form-card{background:var(--surface-grad);border:1px solid var(--border-subtle);border-radius:var(--r-lg);padding:var(--sp-6);display:grid;gap:var(--sp-5)}
+/* "Other" goal reveals its free-text field via CSS alone (:has, not a JS-toggled [hidden]) — it needs to work
+   even if trial-form.ts's own 'change' listener somehow doesn't run on a given device; the JS still runs
+   scrollIntoView on top of this so it's not just below-the-fold on a small screen. */
+#goal-other{display:none}
+.connect-form:has(input[name="goal"][value="other"]:checked) #goal-other{display:grid}
 @media(min-width:1024px){.form-card{padding:var(--sp-8)}}
 @media(min-width:1024px){.connect-intro{position:sticky;top:calc(var(--header-h) + 24px)}}
 .form-note{font-size:13px;color:var(--text-muted)}
