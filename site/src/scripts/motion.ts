@@ -53,35 +53,27 @@ function animateCount(el: HTMLElement) {
   requestAnimationFrame(frame);
 }
 
-// --- Testimonial marquee: two genuinely different mechanisms depending on platform — see setupNativeScroll and
-// setupTransformDriven below for why. isIOS also covers iPadOS, which reports as "MacIntel" but is touch-
+// --- Testimonial marquee: genuinely different mechanisms per platform — see setupTransformDriven and the
+// html.ios rules in layout.css for why. isIOS also covers iPadOS, which reports as "MacIntel" but is touch-
 // capable, unlike a real Mac. ---
 const isIOS = /iP(hone|od|ad)/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
 
-document.querySelectorAll<HTMLElement>('[data-marquee]').forEach((el) => {
-  const track = el.querySelector<HTMLElement>('.tcarousel-track');
-  if (!track) return;
-  if (isIOS) setupNativeScroll(el, track);
-  else setupTransformDriven(el, track);
-});
+// iOS gets ZERO JavaScript involvement in the carousel at all — see the html.ios rules in layout.css, applied
+// by an inline script in Base.astro's <head> that runs before body content even parses. Every previous fix here
+// (display:none via JS, .remove() via JS, even CSS rules keyed off a class JS added to the element later) still
+// left some DOM/class mutation happening AFTER the browser's first layout, and scrolling into dead space past
+// the real content persisted on a real iPhone regardless — consistent with iOS's scroll container caching stale
+// bounds from whatever it first committed to. Nothing here can be "after first commit" if nothing here runs.
+if (!isIOS) {
+  document.querySelectorAll<HTMLElement>('[data-marquee]').forEach((el) => {
+    const track = el.querySelector<HTMLElement>('.tcarousel-track');
+    if (track) setupTransformDriven(el, track);
+  });
+}
 
 // The card list is rendered 3x in the markup (index.astro) so there's a full extra copy of buffer on each side
-// of whichever one is "current" — shared by both mechanisms below.
+// of whichever one is "current".
 function loopWidthOf(track: HTMLElement) { return track.scrollWidth / 3; }
-
-// --- iOS: genuine native scrolling (see .tcarousel--ios in layout.css), and — per explicit request, after a
-// seamless loop kept hitting new real-device-only problems each attempt (dead space at the seam even with a
-// tripled-content buffer, invisible-content and other compositing quirks) — a FINITE carousel here, not an
-// infinite one. The duplicated copies (used for the loop on other platforms, see setupTransformDriven) are
-// simply hidden, leaving plain bounded native scrolling with the first and last real card as endpoints; no
-// custom repositioning logic left to get wrong. ---
-function setupNativeScroll(el: HTMLElement, track: HTMLElement) {
-  el.classList.add('tcarousel--ios');
-  // .remove() outright, not display:none — the duplicates still being present in the DOM (even invisible) is
-  // one more way iOS's scroll-container content size could end up not matching what's actually on screen. An
-  // element that's gone can't contribute to scrollWidth in any browser, no ambiguity possible.
-  track.querySelectorAll<HTMLElement>('.tcard[aria-hidden="true"]').forEach((c) => c.remove());
-}
 
 // --- Non-iOS (desktop, Android): auto-advances via a plain CSS transform on .tcarousel-track, driven entirely
 // by this script — deliberately NOT a real scrollable element, since a native scroll container's momentum

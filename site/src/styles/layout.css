@@ -198,24 +198,25 @@
 .tcarousel{overflow:hidden;margin:0 calc(var(--gutter) * -1);padding:4px 0;-webkit-mask-image:linear-gradient(to right,transparent,#000 var(--gutter),#000 calc(100% - var(--gutter)),transparent);mask-image:linear-gradient(to right,transparent,#000 var(--gutter),#000 calc(100% - var(--gutter)),transparent)}
 .tcarousel-track{display:flex;align-items:stretch;gap:16px;width:max-content;touch-action:pan-y;cursor:grab}
 .tcarousel-track:active{cursor:grabbing}
-/* iOS: a real scroll container again (see src/scripts/motion.ts's isIOS branch) — native touch/momentum handles
-   the swipe entirely on its own, JS only silently re-centres after scrolling settles, never during it.
-   -webkit-mask-image + a touch-momentum scroll container is a known iOS Safari compositing bug that can render
-   the ENTIRE masked content invisible, not just fail to fade its edges — confirmed exactly that on a real
-   iPhone. The mask is dropped here rather than risk it; -webkit-overflow-scrolling:touch is also skipped since
-   it's a legacy property modern iOS scrolls smoothly without anyway, and was the other half of that same
-   problematic combination. */
-.tcarousel.tcarousel--ios{overflow-x:auto;overflow-y:hidden;scrollbar-width:none;-webkit-mask-image:none;mask-image:none}
-/* html.ios is set by an inline script in Base.astro's <head>, before body content parses — the duplicated
-   "loop" cards (used elsewhere for the auto-advancing loop, see setupTransformDriven in motion.ts) need to be
-   gone from THIS element's very first layout on iOS, not removed by JS after an initial layout already
-   committed them: iOS's scroll container can cache scroll bounds from that first commit, which read as being
-   able to scroll into empty space past the real content with nothing there to ever stop it. src/scripts/
-   motion.ts's setupNativeScroll() also removes them outright as a backup, which is a harmless no-op once this
-   rule has already kept them from ever being laid out to begin with. */
+/* iOS: everything here is keyed off html.ios — set by an inline script in Base.astro's <head> that runs before
+   body content even parses — not off any class or DOM change JS makes later. Every earlier attempt (JS setting
+   display:none, JS calling .remove(), even a JS-added element class driving these same CSS rules) still left
+   something happening AFTER the browser's first layout/paint, and scrolling into dead space past the real
+   content persisted on a real iPhone regardless of which — consistent with iOS's scroll container caching stale
+   bounds from whatever it first committed to. Nothing here can be "after first commit" if nothing here runs
+   after the first commit: the container is already a real, unmasked scroll container and the duplicated "loop"
+   cards (used elsewhere for the auto-advancing loop, see setupTransformDriven in motion.ts) are already gone
+   before any layout happens at all, full stop — genuine native scrolling handles drag/momentum/bounds entirely
+   on its own from there, with zero JS involvement in this carousel on iOS whatsoever.
+   -webkit-mask-image + a touch-momentum scroll container is also a known iOS Safari compositing bug that can
+   render the ENTIRE masked content invisible, not just fail to fade its edges — confirmed exactly that on a real
+   iPhone earlier, which is why the mask is dropped here rather than risked; -webkit-overflow-scrolling:touch is
+   skipped too since it's a legacy property modern iOS scrolls smoothly without anyway, and was the other half of
+   that same problematic pairing. */
+html.ios .tcarousel{overflow-x:auto;overflow-y:hidden;scrollbar-width:none;-webkit-mask-image:none;mask-image:none}
+html.ios .tcarousel::-webkit-scrollbar{display:none}
+html.ios .tcarousel-track{touch-action:auto;cursor:auto}
 html.ios .tcarousel-track .tcard[aria-hidden="true"]{display:none}
-.tcarousel.tcarousel--ios::-webkit-scrollbar{display:none}
-.tcarousel.tcarousel--ios .tcarousel-track{touch-action:auto;cursor:auto}
 /* align-items:stretch (inherited from the flex row) is what makes every card match the tallest one — it only
    works because .tcard itself has no explicit height; a shorter quote's card gets stretched to fill that height,
    and its footer's margin-top:auto absorbs the extra space above the avatar row. */
