@@ -160,8 +160,15 @@ function init(form: HTMLFormElement) {
   errorBox.querySelector('[data-retry]')?.addEventListener('click', () => form.requestSubmit());
 
   // "Other" goal reveals an optional free-text field — shown whenever the "other" checkbox itself is checked,
-  // regardless of which checkbox in the group just changed (several can be checked at once now).
+  // regardless of which checkbox in the group just changed (several can be checked at once now). It sits right
+  // after the chip row, which can land below the fold on a small screen right when it's revealed — scrolled
+  // into view so it's never just silently appearing off-screen.
   const other = document.getElementById('goal-other');
   const otherBox = form.querySelector<HTMLInputElement>('input[name="goal"][value="other"]');
-  form.querySelectorAll<HTMLInputElement>('input[name="goal"]').forEach((r) => r.addEventListener('change', () => { if (other && otherBox) other.hidden = !otherBox.checked; }));
+  form.querySelectorAll<HTMLInputElement>('input[name="goal"]').forEach((r) => r.addEventListener('change', () => {
+    if (!other || !otherBox) return;
+    const wasHidden = other.hidden;
+    other.hidden = !otherBox.checked;
+    if (wasHidden && !other.hidden) other.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+  }));
 }

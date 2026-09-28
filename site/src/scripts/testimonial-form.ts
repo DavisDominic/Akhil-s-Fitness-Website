@@ -73,11 +73,19 @@ function init(form: HTMLFormElement) {
   const alertHtml = (icon: string, title: string, body: string, tone: 'ok' | 'bad') =>
     `<div class="alert ${tone}" role="${tone === 'bad' ? 'alert' : 'status'}"><svg class="icon" aria-hidden="true" focusable="false"><use href="#i-${icon}"/></svg><div><b>${title}</b><p>${body}</p></div></div>`;
 
+  // Submit stays disabled until "I agree" is actually checked, rather than only surfacing that as a validation
+  // error after the visitor has already tried to submit.
+  const consent = fieldEl('consent') as HTMLInputElement;
+  const syncSubmitDisabled = () => { submit.disabled = sending || !consent.checked; };
+  consent.addEventListener('change', syncSubmitDisabled);
+  syncSubmitDisabled();
+
   const setSending = (on: boolean) => {
     sending = on;
     form.setAttribute('aria-busy', String(on));
     form.querySelectorAll<HTMLInputElement>('input,textarea').forEach((i) => { if (!i.closest('.hp')) i.disabled = on; });
     submit.innerHTML = on ? '<svg class="icon sm spin" aria-hidden="true" focusable="false"><use href="#i-spinner"/></svg> Sending…' : submitLabel;
+    syncSubmitDisabled();
   };
 
   async function send() {
