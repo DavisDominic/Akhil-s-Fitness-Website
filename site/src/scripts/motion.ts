@@ -53,75 +53,82 @@ function animateCount(el: HTMLElement) {
   requestAnimationFrame(frame);
 }
 
-// --- Testimonial marquee: auto-advances by moving .tcarousel's own scrollLeft every frame (it's a real
-// overflow-x:auto container — see layout.css — so a finger/mouse can also drag it natively). Wraps seamlessly
-// past track.scrollWidth/2 since the card list is duplicated once in the markup. Paused while genuinely hovered
-// (gated to devices that actually support hover — a touch tap leaves a "sticky" :hover with nothing to clear it)
-// or while a finger is down, and resumes right away once nothing is actively moving the scroll position.
-// Resuming is NOT simply "on touchend": a real swipe keeps coasting via the browser's own momentum scrolling
-// well after the finger lifts, and writing scrollLeft ourselves while that's still happening fights/kills the
-// native momentum. A native 'scroll' listener (which fires for both a manual drag AND its momentum tail) tracks
-// "something is actively scrolling this" and only lets the auto-driver resume a short idle moment after the
-// last of those events. That detector compares the observed scrollLeft against our own last-written position
-// rather than flagging "the next event is ours to ignore" — on iPhone Safari, scroll events from a drag/
-// momentum can arrive coalesced in ways that let a real swipe slip past a simple flag, which is what let the
-// auto-driver keep nudging scrollLeft forward THROUGH a user's backward swipe (unable to swipe back) and, since
-// nothing was ever pulling the position down from wherever a fast swipe left it, let it reach the true trailing
-// edge of the duplicated content — the dead space of iOS's own rubber-band overscroll past real content, with
-// nothing left to scroll back from. The idle-settle moment now also silently re-wraps the position into
-// [0, half) — invisible, since the two halves are identical content — so neither a swipe nor the auto-driver
-// can ever actually reach that true edge in the first place. ---
+// --- Testimonial marquee: auto-advances via a plain CSS transform on .tcarousel-track, driven entirely by this
+// script — deliberately NOT a real scrollable element. An earlier version used overflow-x:auto + JS writing
+// scrollLeft so drag/wheel worked "for free", but native scrolling has a real, browser-enforced end; a transform
+// does not. On a real iPhone that native end collided with iOS's own rubber-band overscroll past the (doubled,
+// for seamless wrap) content, and once stuck there no amount of re-wrapping scrollLeft from JS recovered it —
+// confirmed needing a full reload. Owning position as a plain number and painting it via translateX sidesteps
+// that whole class of bug: there is no native scroll boundary to ever reach or fight, so wrapping the number is
+// unconditionally safe. touch-action:pan-y (layout.css) leaves vertical page scrolling to the browser while
+// touchmove here handles the horizontal drag ourselves. Paused while genuinely hovered (gated to devices that
+// actually support hover — a touch tap leaves a "sticky" :hover with nothing to clear it) or while a finger/
+// mouse is down, resuming immediately on release — there's no native momentum to fight anymore either, since we
+// are the only thing moving this element. ---
 document.querySelectorAll<HTMLElement>('[data-marquee]').forEach((el) => {
   const track = el.querySelector<HTMLElement>('.tcarousel-track');
   if (!track || reduceMotion()) return;
 
   const SPEED = 45; // px/s
-  let paused = false; // hover / focus / finger-down
-  let userScrolling = false; // a drag or its momentum is actively moving scrollLeft right now
-  let idleTimer: ReturnType<typeof setTimeout> | undefined;
+  let paused = false; // hover / focus
+  let dragging = false;
+  let dragStartX = 0;
+  let dragStartPos = 0;
   let last = performance.now();
-  // Our own float accumulator, not re-derived from el.scrollLeft each frame: a per-frame advance at this speed
-  // is well under a pixel, and reading a just-written scrollLeft back can hand us a rounded/quantized value —
-  // accumulating against THAT silently loses almost the entire increment every frame instead of building up to
-  // real motion. Only resynced from the real scrollLeft once the user's drag/momentum has actually settled.
-  let pos = el.scrollLeft;
+  let pos = 0;
 
   const halfWidth = () => track!.scrollWidth / 2;
   const wrap = (p: number, half: number) => { const r = p % half; return r < 0 ? r + half : r; };
+  const render = () => { track!.style.transform = `translateX(${-pos}px)`; };
 
   function tick(now: number) {
     // Clamped so a long background/throttled gap (tab switched away, phone locked) resumes smoothly from
     // wherever it visually was instead of jumping far ahead to "catch up" for time nobody was watching.
     const dt = Math.min(now - last, 100);
     last = now;
-    const half = halfWidth();
-    // track.scrollWidth can still read as 0 on the very first frame or two, before layout has fully settled —
-    // half would be 0, and pos % 0 is NaN, which (unlike a normal out-of-range number) never recovers on its
-    // own once it poisons pos, since NaN propagates through every later frame's arithmetic forever. Skip the
-    // write on any frame where half isn't yet a usable, positive number rather than let that happen.
-    if (!paused && !userScrolling && half > 0) {
-      pos = wrap(pos + (SPEED * dt) / 1000, half);
-      el.scrollLeft = pos;
+    if (!paused && !dragging) {
+      const half = halfWidth();
+      // track.scrollWidth can still read as 0 on the very first frame or two, before layout has fully settled —
+      // half would be 0, and pos % 0 is NaN, which never recovers on its own once it poisons pos, since NaN
+      // propagates through every later frame's arithmetic forever. Skip the write until half is usable.
+      if (half > 0) { pos = wrap(pos + (SPEED * dt) / 1000, half); render(); }
     }
     requestAnimationFrame(tick);
   }
   requestAnimationFrame(tick);
 
-  el.addEventListener('scroll', () => {
-    // A scroll event that lands close to where we last wrote pos ourselves is our own write echoing back —
-    // not real user activity. Anything else is a genuine drag or its momentum tail.
-    if (Math.abs(el.scrollLeft - pos) <= 2) return;
-    userScrolling = true;
-    clearTimeout(idleTimer);
-    idleTimer = setTimeout(() => {
-      userScrolling = false;
-      const half = halfWidth();
-      if (half > 0) {
-        pos = wrap(el.scrollLeft, half);
-        el.scrollLeft = pos; // no-op if already in range; otherwise an invisible re-centre, not a visible jump
-      }
-    }, 120);
-  }, { passive: true });
+  function dragStart(clientX: number) {
+    dragging = true;
+    dragStartX = clientX;
+    dragStartPos = pos;
+  }
+  function dragMove(clientX: number) {
+    if (!dragging) return;
+    const half = halfWidth();
+    if (half <= 0) return;
+    pos = wrap(dragStartPos - (clientX - dragStartX), half);
+    render();
+  }
+  function dragEnd() { dragging = false; }
+
+  el.addEventListener('touchstart', (e) => dragStart(e.touches[0].clientX), { passive: true });
+  el.addEventListener('touchmove', (e) => dragMove(e.touches[0].clientX), { passive: true });
+  el.addEventListener('touchend', dragEnd, { passive: true });
+  el.addEventListener('touchcancel', dragEnd, { passive: true });
+
+  // Mouse drag, for parity with the trackpad/wheel scroll a native scroll container used to give desktop for free.
+  el.addEventListener('mousedown', (e) => { dragStart(e.clientX); e.preventDefault(); });
+  window.addEventListener('mousemove', (e) => dragMove(e.clientX));
+  window.addEventListener('mouseup', dragEnd);
+
+  el.addEventListener('wheel', (e) => {
+    if (Math.abs(e.deltaX) <= Math.abs(e.deltaY)) return; // clearly vertical page-scroll intent — ignore
+    e.preventDefault();
+    const half = halfWidth();
+    if (half <= 0) return;
+    pos = wrap(pos + e.deltaX, half);
+    render();
+  }, { passive: false });
 
   if (matchMedia('(hover: hover)').matches) {
     el.addEventListener('mouseenter', () => { paused = true; });
@@ -130,7 +137,14 @@ document.querySelectorAll<HTMLElement>('[data-marquee]').forEach((el) => {
   el.addEventListener('focusin', () => { paused = true; });
   el.addEventListener('focusout', () => { paused = false; });
 
-  el.addEventListener('touchstart', () => { paused = true; }, { passive: true });
-  el.addEventListener('touchend', () => { paused = false; }, { passive: true });
-  el.addEventListener('touchcancel', () => { paused = false; }, { passive: true });
+  // Arrow-key scrolling: a plain transform isn't a native scroll container the browser handles this for
+  // automatically anymore, so it's reimplemented here to keep the tabindex/role on this element meaningful.
+  el.addEventListener('keydown', (e) => {
+    if (e.key !== 'ArrowLeft' && e.key !== 'ArrowRight') return;
+    const half = halfWidth();
+    if (half <= 0) return;
+    pos = wrap(pos + (e.key === 'ArrowRight' ? 80 : -80), half);
+    render();
+    e.preventDefault();
+  });
 });

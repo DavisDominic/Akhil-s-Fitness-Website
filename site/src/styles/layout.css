@@ -182,17 +182,18 @@
 .metrics .metric b{display:block;font:800 40px/1 var(--font-display);color:var(--accent-500)}
 .metrics .metric span{display:block;margin-top:4px;font:500 16px/1.4 var(--font-body);color:var(--text-secondary)}
 @media(min-width:700px){.metrics .metric b{font-size:clamp(40px,6vw,48px)}}
-/* Auto-advancing AND swipeable: a genuine horizontally-scrollable container (native touch drag, trackpad,
-   mouse-wheel all work for free), auto-scrolled by JS (src/scripts/motion.ts) incrementing scrollLeft every
-   frame rather than a CSS transform loop — a real scroll container is what makes it draggable, and JS control
-   is what lets a touch/drag pause it and resume immediately on release with no fight against a competing CSS
-   animation. The card list is rendered twice back to back (the second copy is aria-hidden, purely visual) so
-   the JS can wrap scrollLeft past track.scrollWidth/2 with no visible seam. Scrollbar hidden since the edge-fade
-   mask (below) already signals "more content" without one. prefers-reduced-motion is checked directly in the JS
-   (it drives scrollLeft, not a CSS animation, so the global reduced-motion override in base.css can't reach it). */
-.tcarousel{overflow-x:auto;overflow-y:hidden;overscroll-behavior-x:contain;-webkit-overflow-scrolling:touch;scrollbar-width:none;margin:0 calc(var(--gutter) * -1);padding:4px 0;-webkit-mask-image:linear-gradient(to right,transparent,#000 var(--gutter),#000 calc(100% - var(--gutter)),transparent);mask-image:linear-gradient(to right,transparent,#000 var(--gutter),#000 calc(100% - var(--gutter)),transparent)}
-.tcarousel::-webkit-scrollbar{display:none}
-.tcarousel-track{display:flex;align-items:stretch;gap:16px;width:max-content}
+/* Auto-advancing AND swipeable, but NOT via native scrolling: an earlier version used a real overflow-x:auto
+   container so drag/trackpad/wheel worked "for free", auto-scrolled by JS incrementing scrollLeft every frame.
+   On iOS that fought the browser's own rubber-band overscroll at the true end of the (once) doubled content —
+   confirmed on a real iPhone to get permanently stuck in that dead space after a hard swipe, needing a reload.
+   Native scrolling has a real, enforced "end"; a CSS transform does not. So this container no longer scrolls at
+   all (overflow:hidden) — position is a plain translateX driven entirely by src/scripts/motion.ts, which owns
+   drag (touch/pointer) as well as the auto-advance, and wraps its own number with no native scroll boundary to
+   ever hit or fight in the first place. touch-action:pan-y leaves vertical page scrolling to the browser while
+   JS handles the horizontal gesture itself. */
+.tcarousel{overflow:hidden;margin:0 calc(var(--gutter) * -1);padding:4px 0;-webkit-mask-image:linear-gradient(to right,transparent,#000 var(--gutter),#000 calc(100% - var(--gutter)),transparent);mask-image:linear-gradient(to right,transparent,#000 var(--gutter),#000 calc(100% - var(--gutter)),transparent)}
+.tcarousel-track{display:flex;align-items:stretch;gap:16px;width:max-content;touch-action:pan-y;cursor:grab}
+.tcarousel-track:active{cursor:grabbing}
 /* align-items:stretch (inherited from the flex row) is what makes every card match the tallest one — it only
    works because .tcard itself has no explicit height; a shorter quote's card gets stretched to fill that height,
    and its footer's margin-top:auto absorbs the extra space above the avatar row. */
