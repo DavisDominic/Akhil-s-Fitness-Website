@@ -191,9 +191,7 @@ const faq = [
       <div class="tcarousel" data-marquee tabindex="0" role="region" aria-label="Client testimonials, auto-scrolling">
         <div class="tcarousel-track">
           {sampleTestimonials.map((t) => <TestimonialCard t={t} />)}
-          <div aria-hidden="true" style="display:contents">
-            {sampleTestimonials.map((t) => <TestimonialCard t={t} />)}
-          </div>
+          {sampleTestimonials.map((t) => <TestimonialCard t={t} hidden />)}
         </div>
       </div>
     </div>

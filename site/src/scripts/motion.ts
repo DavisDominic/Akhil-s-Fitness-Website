@@ -65,6 +65,10 @@ function animateCount(el: HTMLElement) {
 // actually support hover — a touch tap leaves a "sticky" :hover with nothing to clear it) or while a finger/
 // mouse is down, resuming immediately on release — there's no native momentum to fight anymore either, since we
 // are the only thing moving this element. ---
+// iOS only, per explicit request: keep the loop + swipe, drop the self-driven autoplay entirely there. (Also
+// iPadOS, which reports as "MacIntel" but is touch-capable, unlike a real Mac.)
+const isIOS = /iP(hone|od|ad)/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+
 document.querySelectorAll<HTMLElement>('[data-marquee]').forEach((el) => {
   const track = el.querySelector<HTMLElement>('.tcarousel-track');
   if (!track) return;
@@ -89,7 +93,7 @@ document.querySelectorAll<HTMLElement>('[data-marquee]').forEach((el) => {
     // prefers-reduced-motion only cancels the self-driven autoplay — dragging/swiping is the visitor's own
     // action, not motion imposed on them, so it stays available regardless (and was wrongly gated on the same
     // reduceMotion() check as autoplay before, making the whole thing inert for anyone with that preference on).
-    if (!paused && !dragging && !reduceMotion()) {
+    if (!paused && !dragging && !reduceMotion() && !isIOS) {
       const half = halfWidth();
       // track.scrollWidth can still read as 0 on the very first frame or two, before layout has fully settled —
       // half would be 0, and pos % 0 is NaN, which never recovers on its own once it poisons pos, since NaN
