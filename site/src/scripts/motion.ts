@@ -89,12 +89,11 @@ function setupNativeScroll(el: HTMLElement, track: HTMLElement) {
     while (el.scrollLeft > lw * 1.5) el.scrollLeft -= lw;
   }
 
-  function start() {
-    const lw = loopWidthOf(track);
-    if (lw <= 0) { requestAnimationFrame(start); return; } // layout not settled yet — try again next frame
-    el.scrollLeft = lw; // begin in the middle copy, so there's a full copy's worth of room either direction
-  }
-  requestAnimationFrame(start);
+  // Deliberately does NOT set el.scrollLeft on load to pre-position into the middle copy — that depended on
+  // track.scrollWidth already being accurate at that moment, one more thing to go wrong for no real benefit.
+  // Starting at the natural 0 (first copy, i.e. the real, non-duplicated cards) is always correct immediately;
+  // it just means there's no backward buffer until the visitor has scrolled forward at least once, which is a
+  // minor trade next to one more unverified assumption about real-device timing.
 
   el.addEventListener('scroll', () => {
     clearTimeout(idleTimer);

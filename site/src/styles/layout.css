@@ -199,8 +199,13 @@
 .tcarousel-track{display:flex;align-items:stretch;gap:16px;width:max-content;touch-action:pan-y;cursor:grab}
 .tcarousel-track:active{cursor:grabbing}
 /* iOS: a real scroll container again (see src/scripts/motion.ts's isIOS branch) — native touch/momentum handles
-   the swipe entirely on its own, JS only silently re-centres after scrolling settles, never during it. */
-.tcarousel.tcarousel--ios{overflow-x:auto;overflow-y:hidden;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+   the swipe entirely on its own, JS only silently re-centres after scrolling settles, never during it.
+   -webkit-mask-image + a touch-momentum scroll container is a known iOS Safari compositing bug that can render
+   the ENTIRE masked content invisible, not just fail to fade its edges — confirmed exactly that on a real
+   iPhone. The mask is dropped here rather than risk it; -webkit-overflow-scrolling:touch is also skipped since
+   it's a legacy property modern iOS scrolls smoothly without anyway, and was the other half of that same
+   problematic combination. */
+.tcarousel.tcarousel--ios{overflow-x:auto;overflow-y:hidden;scrollbar-width:none;-webkit-mask-image:none;mask-image:none}
 .tcarousel.tcarousel--ios::-webkit-scrollbar{display:none}
 .tcarousel.tcarousel--ios .tcarousel-track{touch-action:auto;cursor:auto}
 /* align-items:stretch (inherited from the flex row) is what makes every card match the tallest one — it only
