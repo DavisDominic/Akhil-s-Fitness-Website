@@ -1,5 +1,4 @@
 // Single place for contact details, availability and verified figures (PRD §36, §44, §48.7 "Site configuration").
-// PLACEHOLDER: email is NOT real yet. Replace before launch (checklist: docs/PRD_v1.2_Addendum.md §6).
 export type Availability = 'taking' | 'limited' | 'full';
 
 export const site = {
@@ -11,7 +10,7 @@ export const site = {
   availability: 'taking' as Availability,
   whatsapp: '919074037117', // international format, no "+"
   phone: '+91 90740 37117',
-  email: 'hello@akhilfitness.example',
+  email: 'akhilmp873@gmail.com',
   // Verified figures only (PRD §44). Do not change without Akhil's confirmation.
   metrics: [
     { value: '2,400+', label: 'Hours of hands-on training', short: 'Hours of\ncoaching' },
