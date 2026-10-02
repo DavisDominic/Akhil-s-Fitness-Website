@@ -189,8 +189,15 @@
    owns drag/momentum/bounds entirely — there's nothing left here to fight it. scroll-snap-type gives it a
    settled, "one card at a time" feel without any JS. No edge-fade mask this time either (a CSS mask combined
    with touch-momentum scrolling was the exact cause of the carousel going fully invisible on iOS at one point)
-   — not worth the risk for a purely decorative effect on a component with this history. */
-.tcarousel{overflow-x:auto;overflow-y:hidden;margin:0 calc(var(--gutter) * -1);padding:4px var(--gutter) 16px;scroll-snap-type:x proximity;scrollbar-width:thin;scrollbar-color:var(--accent-500) transparent}
+   — not worth the risk for a purely decorative effect on a component with this history.
+   Still hit dead space past the last card on iOS even with ALL of the above eliminated, which points at
+   something CSS-level rather than JS/content after all: this used to bleed edge-to-edge via a negative margin
+   (pulling itself out of .container's own gutter) with compensating padding to re-indent the content — a
+   negative margin on the scrolling element itself, not a wrapper. iOS Safari has real, known issues computing a
+   scroll container's content bounds correctly when a negative margin is involved; dropped it rather than keep
+   chasing this on a component with this much history. No edge-to-edge bleed now, just sits in .container like
+   any other block — a visual trade worth making for this to just work reliably. */
+.tcarousel{overflow-x:auto;overflow-y:hidden;padding:4px 0 16px;scroll-snap-type:x proximity;scrollbar-width:thin;scrollbar-color:var(--accent-500) transparent}
 .tcarousel::-webkit-scrollbar{height:6px}
 .tcarousel::-webkit-scrollbar-track{background:transparent}
 .tcarousel::-webkit-scrollbar-thumb{background:var(--accent-500);border-radius:99px}
