@@ -207,8 +207,12 @@
    and its footer's margin-top:auto absorbs the extra space above the avatar row. */
 /* Sized in vw, not a flex-basis percentage: the track's own width is max-content (so the row never wraps), and a
    percentage flex-basis would have nothing stable to resolve against in that case — the child and the container
-   would each be sizing off the other. vw sizes each card off the viewport instead, sidestepping that entirely. */
-.tcarousel-track .tcard{flex:0 0 82vw;min-width:0;scroll-snap-align:start}
+   would each be sizing off the other. vw sizes each card off the viewport instead, sidestepping that entirely.
+   Capped with min() so it hugs the content on a normal phone instead of stretching to fill nearly the whole
+   screen width per card (82vw was sized for the old one-card-fills-the-screen marquee look, which doesn't apply
+   now that this is a plain scrollable list) — on a wide phone that'd mean 5 cards is still ~4x the viewport,
+   needlessly far to scroll through for no visual benefit. */
+.tcarousel-track .tcard{flex:0 0 min(78vw,320px);min-width:0;scroll-snap-align:start}
 @media(min-width:700px){.tcarousel-track .tcard{flex:0 0 55vw}}
 @media(min-width:1024px){.tcarousel-track{gap:24px}.tcarousel-track .tcard{flex:0 0 400px}}
 .tcard .sample{align-self:flex-start}
