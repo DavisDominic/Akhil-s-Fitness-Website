@@ -1,11 +1,25 @@
 ---
+// Server-rendered (not prerendered) specifically so the testimonial carousel below can read real,
+// Akhil-approved submissions out of D1 on every request — see getApprovedTestimonials().
+export const prerender = false;
 import Base from '../layouts/Base.astro';
 import Button from '../components/ui/Button.astro';
 import Icon from '../components/ui/Icon.astro';
 import Pill from '../components/Pill.astro';
 import TestimonialCard from '../components/TestimonialCard.astro';
 import { site, trialHref, trialLabel, waGeneral } from '../data/site';
-import { sampleTestimonials } from '../data/testimonials';
+import { sampleTestimonials, type Testimonial } from '../data/testimonials';
+import { getEnv } from '../lib/server/env';
+import { getApprovedTestimonials } from '../lib/server/testimonials';
+
+// Real, Akhil-approved submissions first (freshest social proof), then the hand-picked baseline below —
+// never the other way, and never dropping the baseline once there are enough real ones: it's Akhil's own
+// curated set, not filler. Swallows a DB hiccup rather than breaking the whole homepage over it.
+const approved = await getApprovedTestimonials(getEnv()).catch(() => []);
+const testimonials: Testimonial[] = [
+  ...approved.map((t): Testimonial => ({ name: t.name, society: t.society, occupation: t.occupation ?? undefined, quote: t.quote })),
+  ...sampleTestimonials,
+];
 
 // Copy: PRD §47 "Final website copy" (HOME). Sequence: Recognition, Promise, Philosophy, Value, Proof, Authority, Fit, Trial, FAQ, CTA.
 // Training modalities: condensed from Akhil's own category breakdown (one bullet per group of related items,
@@ -184,15 +198,14 @@ const faq = [
     </div>
   </section>
 
-  <!-- PROOF (sample cards until real, consented testimonials are connected in step 4) -->
+  <!-- PROOF: real, Akhil-approved submissions (via the Telegram review queue) plus his own hand-picked
+       baseline — see the frontmatter above. Plain native horizontal scroll, no autoplay (see layout.css). -->
   <section class="section" aria-labelledby="proof-h">
     <div class="container">
       <div class="sec-head reveal"><h2 class="t-h2" id="proof-h">Real people. <span>Real progress.</span></h2></div>
-      <div class="tcarousel" data-marquee tabindex="0" role="region" aria-label="Client testimonials, auto-scrolling">
+      <div class="tcarousel" tabindex="0" role="region" aria-label="Client testimonials">
         <div class="tcarousel-track">
-          {sampleTestimonials.map((t) => <TestimonialCard t={t} />)}
-          {sampleTestimonials.map((t) => <TestimonialCard t={t} hidden />)}
-          {sampleTestimonials.map((t) => <TestimonialCard t={t} hidden />)}
+          {testimonials.map((t) => <TestimonialCard t={t} />)}
         </div>
       </div>
     </div>

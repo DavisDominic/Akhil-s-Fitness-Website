@@ -1,8 +1,8 @@
-// Shared motion behaviours, loaded once site-wide (Base.astro): scroll-reveal, stat count-up, and the
-// testimonial marquee's auto-scroll. CSS transitions/animations handle their own prefers-reduced-motion via the
-// global near-zero-duration override in base.css; the *JS-driven* motion here (the counter's manual rAF loop,
-// and the marquee's scrollLeft loop) checks the media query directly since that global CSS override can't reach
-// into JS math or a rAF loop.
+// Shared motion behaviours, loaded once site-wide (Base.astro): scroll-reveal and stat count-up. CSS
+// transitions/animations handle their own prefers-reduced-motion via the global near-zero-duration override in
+// base.css; the counter's manual rAF loop checks the media query directly since that global CSS override can't
+// reach into JS math. (The testimonial carousel used to live here too — it's a plain native-scrolling element
+// now, no JS involved at all; see .tcarousel in layout.css.)
 const reduceMotion = () => matchMedia('(prefers-reduced-motion: reduce)').matches;
 
 // --- Scroll-reveal: fade + rise the first time an element enters the viewport, then stop watching it. ---
@@ -51,120 +51,4 @@ function animateCount(el: HTMLElement) {
     else el.textContent = final; // restores the exact original string (comma + "+") on completion
   }
   requestAnimationFrame(frame);
-}
-
-// --- Testimonial marquee: genuinely different mechanisms per platform — see setupTransformDriven and the
-// html.ios rules in layout.css for why. isIOS also covers iPadOS, which reports as "MacIntel" but is touch-
-// capable, unlike a real Mac. ---
-const isIOS = /iP(hone|od|ad)/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
-
-// iOS gets ZERO JavaScript involvement in the carousel at all — see the html.ios rules in layout.css, applied
-// by an inline script in Base.astro's <head> that runs before body content even parses. Every previous fix here
-// (display:none via JS, .remove() via JS, even CSS rules keyed off a class JS added to the element later) still
-// left some DOM/class mutation happening AFTER the browser's first layout, and scrolling into dead space past
-// the real content persisted on a real iPhone regardless — consistent with iOS's scroll container caching stale
-// bounds from whatever it first committed to. Nothing here can be "after first commit" if nothing here runs.
-if (!isIOS) {
-  document.querySelectorAll<HTMLElement>('[data-marquee]').forEach((el) => {
-    const track = el.querySelector<HTMLElement>('.tcarousel-track');
-    if (track) setupTransformDriven(el, track);
-  });
-}
-
-// The card list is rendered 3x in the markup (index.astro) so there's a full extra copy of buffer on each side
-// of whichever one is "current".
-function loopWidthOf(track: HTMLElement) { return track.scrollWidth / 3; }
-
-// --- Non-iOS (desktop, Android): auto-advances via a plain CSS transform on .tcarousel-track, driven entirely
-// by this script — deliberately NOT a real scrollable element, since a native scroll container's momentum
-// fights a continuously-writing autoplay driver (see the iOS branch above for why that's a real problem there).
-// Paused while genuinely hovered (gated to devices that actually support hover — a touch tap leaves a "sticky"
-// :hover with nothing to clear it) or while a finger/mouse is down, resuming immediately on release. ---
-function setupTransformDriven(el: HTMLElement, track: HTMLElement) {
-  const SPEED = 45; // px/s
-  let paused = false; // hover / focus
-  let dragging = false;
-  let dragStartX = 0;
-  let dragStartPos = 0;
-  let last = performance.now();
-  let pos = 0;
-
-  const wrap = (p: number, lw: number) => { const r = p % lw; return r < 0 ? r + lw : r; };
-  const render = () => { track.style.transform = `translateX(${-pos}px)`; };
-
-  function tick(now: number) {
-    // Clamped so a long background/throttled gap (tab switched away, phone locked) resumes smoothly from
-    // wherever it visually was instead of jumping far ahead to "catch up" for time nobody was watching.
-    const dt = Math.min(now - last, 100);
-    last = now;
-    // prefers-reduced-motion only cancels the self-driven autoplay — dragging/swiping is the visitor's own
-    // action, not motion imposed on them, so it stays available regardless.
-    if (!paused && !dragging && !reduceMotion()) {
-      const lw = loopWidthOf(track);
-      // track.scrollWidth can still read as 0 on the very first frame or two, before layout has fully settled —
-      // lw would be 0, and pos % 0 is NaN, which never recovers on its own once it poisons pos, since NaN
-      // propagates through every later frame's arithmetic forever. Skip the write until lw is usable.
-      if (lw > 0) { pos = wrap(pos + (SPEED * dt) / 1000, lw); render(); }
-    }
-    requestAnimationFrame(tick);
-  }
-  requestAnimationFrame(tick);
-
-  function dragStart(clientX: number) {
-    dragging = true;
-    dragStartX = clientX;
-    dragStartPos = pos;
-  }
-  function dragMove(clientX: number) {
-    if (!dragging) return;
-    // Deliberately NOT wrapped here — only tick()'s own autoplay step and dragEnd() below wrap. A real finger
-    // isn't perfectly monotonic; if the raw value happens to hover right at the wrap boundary, wrapping on
-    // every touchmove could flip the result between two very different-looking positions frame to frame from
-    // ordinary sub-pixel jitter, which read as the carousel "wriggling". A CSS transform has no problem with a
-    // value outside [0, lw) for the short, bounded span of a single drag gesture.
-    pos = dragStartPos - (clientX - dragStartX);
-    render();
-  }
-  function dragEnd() {
-    dragging = false;
-    const lw = loopWidthOf(track);
-    if (lw > 0) pos = wrap(pos, lw); // bring it back in range now that nothing is actively rendering it
-  }
-
-  el.addEventListener('touchstart', (e) => dragStart(e.touches[0].clientX), { passive: true });
-  el.addEventListener('touchmove', (e) => dragMove(e.touches[0].clientX), { passive: true });
-  el.addEventListener('touchend', dragEnd, { passive: true });
-  el.addEventListener('touchcancel', dragEnd, { passive: true });
-
-  // Mouse drag, for parity with the trackpad/wheel scroll a native scroll container used to give desktop for free.
-  el.addEventListener('mousedown', (e) => { dragStart(e.clientX); e.preventDefault(); });
-  window.addEventListener('mousemove', (e) => { if (e.buttons & 1) dragMove(e.clientX); else dragEnd(); });
-  window.addEventListener('mouseup', dragEnd);
-
-  el.addEventListener('wheel', (e) => {
-    if (Math.abs(e.deltaX) <= Math.abs(e.deltaY)) return; // clearly vertical page-scroll intent — ignore
-    e.preventDefault();
-    const lw = loopWidthOf(track);
-    if (lw <= 0) return;
-    pos = wrap(pos + e.deltaX, lw);
-    render();
-  }, { passive: false });
-
-  if (matchMedia('(hover: hover)').matches) {
-    el.addEventListener('mouseenter', () => { paused = true; });
-    el.addEventListener('mouseleave', () => { paused = false; });
-  }
-  el.addEventListener('focusin', () => { paused = true; });
-  el.addEventListener('focusout', () => { paused = false; });
-
-  // Arrow-key scrolling: a plain transform isn't a native scroll container the browser handles this for
-  // automatically anymore, so it's reimplemented here to keep the tabindex/role on this element meaningful.
-  el.addEventListener('keydown', (e) => {
-    if (e.key !== 'ArrowLeft' && e.key !== 'ArrowRight') return;
-    const lw = loopWidthOf(track);
-    if (lw <= 0) return;
-    pos = wrap(pos + (e.key === 'ArrowRight' ? 80 : -80), lw);
-    render();
-    e.preventDefault();
-  });
 }

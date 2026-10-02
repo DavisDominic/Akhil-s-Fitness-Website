@@ -45,6 +45,16 @@ export async function insertTestimonial(env: AppEnv, t: NewTestimonial): Promise
 export const getTestimonial = (env: AppEnv, id: string) =>
   env.DB.prepare('SELECT * FROM testimonials WHERE id = ?').bind(id).first<TestimonialRow>();
 
+/** Approved submissions, newest-approved first — the actual public-facing read, used by index.astro to render
+ * real testimonials alongside the hand-picked baseline in src/data/testimonials.ts. Approving in Telegram only
+ * ever flips the DB row's status; this query is what makes that approval actually reach the live page. */
+export async function getApprovedTestimonials(env: AppEnv, limit = 20): Promise<TestimonialRow[]> {
+  const r = await env.DB.prepare(`SELECT * FROM testimonials WHERE status = 'approved' ORDER BY reviewed_at DESC LIMIT ?`)
+    .bind(limit)
+    .all<TestimonialRow>();
+  return r.results;
+}
+
 function testimonialMessage(t: TestimonialRow): string {
   return [
     '📝 <b>New testimonial submitted</b>',
@@ -90,8 +100,8 @@ export async function notifyTestimonial(env: AppEnv, id: string): Promise<void> 
   ).bind(r.ok ? 'sent' : 'failed', r.messageId ?? null, new Date().toISOString(), r.ok ? null : r.error ?? null, id).run();
 }
 
-/** Tap on Approve/Reject in Telegram. Only ever updates Akhil's own review queue — publishing an approved
- * testimonial to the live site is still a manual edit to src/data/testimonials.ts, not automatic. */
+/** Tap on Approve/Reject in Telegram. Flips the DB row's status; getApprovedTestimonials() above is what
+ * picks approved rows up for the live site, on the next request (index.astro is server-rendered, not cached). */
 export async function applyTestimonialAction(env: AppEnv, id: string, action: 'a' | 'r', chatId: number | string, messageId: number): Promise<string> {
   const t = await getTestimonial(env, id);
   if (!t) return 'Testimonial not found';

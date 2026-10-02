@@ -2,13 +2,10 @@
 import Avatar from './ui/Avatar.astro';
 import type { Testimonial } from '../data/testimonials';
 // Name + society required, occupation optional (separator omitted when absent). Works with no photo (DS 6.1).
-// `hidden` marks a visual-only duplicate (the marquee's seamless-loop trick, see index.astro) as aria-hidden —
-// applied per-card rather than via a wrapping display:contents div, which iOS Safari can fail to include in a
-// flex row's sizing at all, effectively dropping the whole duplicated half.
-const { t, hidden = false } = Astro.props as { t: Testimonial; hidden?: boolean };
+const { t } = Astro.props as { t: Testimonial };
 const meta = [t.occupation, t.society].filter(Boolean).join(' · ');
 ---
-<article class="tcard" aria-hidden={hidden || undefined}>
+<article class="tcard">
   {t.sample && <span class="badge warn sample">Sample, not a real client</span>}
   <img src="/images/quote.svg" class="tcard-quote open" alt="" aria-hidden="true" />
   <blockquote>{t.quote}</blockquote>

@@ -182,55 +182,26 @@
 .metrics .metric b{display:block;font:800 40px/1 var(--font-display);color:var(--accent-500)}
 .metrics .metric span{display:block;margin-top:4px;font:500 16px/1.4 var(--font-body);color:var(--text-secondary)}
 @media(min-width:700px){.metrics .metric b{font-size:clamp(40px,6vw,48px)}}
-/* Auto-advancing AND swipeable, but NOT via native scrolling on desktop/Android: an earlier version used a real
-   overflow-x:auto container so drag/trackpad/wheel worked "for free", auto-scrolled by JS incrementing
-   scrollLeft every frame. On iOS that fought the browser's own rubber-band overscroll at the true end of the
-   duplicated content — confirmed on a real iPhone to get permanently stuck in that dead space after a hard
-   swipe, needing a reload. So this container no longer scrolls at all here (overflow:hidden) — position is a
-   plain translateX driven entirely by src/scripts/motion.ts, which owns drag as well as the auto-advance, and
-   wraps its own number with no native scroll boundary to ever hit or fight. touch-action:pan-y leaves vertical
-   page scrolling to the browser while JS handles the horizontal gesture itself.
-   iOS is a DIFFERENT mechanism entirely (see .tcarousel--ios below), not just a tweak of this one: it has no
-   autoplay to fight momentum in the first place (per explicit request), so it goes back to genuine native
-   scrolling there instead — nothing hand-rolled beats the platform's own touch/momentum handling for smoothness,
-   and repeated attempts to patch a hand-rolled touch/transform implementation for iOS specifically (axis
-   detection, preventDefault, etc.) kept surfacing new problems rather than fewer. */
-.tcarousel{overflow:hidden;margin:0 calc(var(--gutter) * -1);padding:4px 0;-webkit-mask-image:linear-gradient(to right,transparent,#000 var(--gutter),#000 calc(100% - var(--gutter)),transparent);mask-image:linear-gradient(to right,transparent,#000 var(--gutter),#000 calc(100% - var(--gutter)),transparent)}
-.tcarousel-track{display:flex;align-items:stretch;gap:16px;width:max-content;touch-action:pan-y;cursor:grab}
-.tcarousel-track:active{cursor:grabbing}
-/* iOS: everything here is keyed off html.ios — set by an inline script in Base.astro's <head> that runs before
-   body content even parses — not off any class or DOM change JS makes later. Every earlier attempt (JS setting
-   display:none, JS calling .remove(), even a JS-added element class driving these same CSS rules) still left
-   something happening AFTER the browser's first layout/paint, and scrolling into dead space past the real
-   content persisted on a real iPhone regardless of which — consistent with iOS's scroll container caching stale
-   bounds from whatever it first committed to. Nothing here can be "after first commit" if nothing here runs
-   after the first commit: the container is already a real, unmasked scroll container and the duplicated "loop"
-   cards (used elsewhere for the auto-advancing loop, see setupTransformDriven in motion.ts) are already gone
-   before any layout happens at all, full stop — genuine native scrolling handles drag/momentum/bounds entirely
-   on its own from there, with zero JS involvement in this carousel on iOS whatsoever.
-   -webkit-mask-image + a touch-momentum scroll container is also a known iOS Safari compositing bug that can
-   render the ENTIRE masked content invisible, not just fail to fade its edges — confirmed exactly that on a real
-   iPhone earlier, which is why the mask is dropped here rather than risked; -webkit-overflow-scrolling:touch is
-   skipped too since it's a legacy property modern iOS scrolls smoothly without anyway, and was the other half of
-   that same problematic pairing. */
-html.ios .tcarousel{overflow-x:auto;overflow-y:hidden;scrollbar-width:none;-webkit-mask-image:none;mask-image:none}
-html.ios .tcarousel::-webkit-scrollbar{display:none}
-html.ios .tcarousel-track{touch-action:auto;cursor:auto}
-html.ios .tcarousel-track .tcard[aria-hidden="true"]{display:none}
+/* Testimonial carousel: rebuilt from scratch as one plain native-scrolling element, same on every platform —
+   no autoplay, no JS driving position, no iOS/non-iOS branching, no duplicated content for a loop. Every one of
+   those was a real, repeated source of bugs on real devices (stuck dead space, invisible content, non-smooth
+   dragging); a bare overflow-x:auto container has none of them because the browser's own scroll implementation
+   owns drag/momentum/bounds entirely — there's nothing left here to fight it. scroll-snap-type gives it a
+   settled, "one card at a time" feel without any JS. No edge-fade mask this time either (a CSS mask combined
+   with touch-momentum scrolling was the exact cause of the carousel going fully invisible on iOS at one point)
+   — not worth the risk for a purely decorative effect on a component with this history. */
+.tcarousel{overflow-x:auto;overflow-y:hidden;margin:0 calc(var(--gutter) * -1);padding:4px var(--gutter) 16px;scroll-snap-type:x proximity;scrollbar-width:thin;scrollbar-color:var(--accent-500) transparent}
+.tcarousel::-webkit-scrollbar{height:6px}
+.tcarousel::-webkit-scrollbar-track{background:transparent}
+.tcarousel::-webkit-scrollbar-thumb{background:var(--accent-500);border-radius:99px}
+.tcarousel-track{display:flex;align-items:stretch;gap:16px;width:max-content}
 /* align-items:stretch (inherited from the flex row) is what makes every card match the tallest one — it only
    works because .tcard itself has no explicit height; a shorter quote's card gets stretched to fill that height,
    and its footer's margin-top:auto absorbs the extra space above the avatar row. */
-/* Sized in vw, not a flex-basis percentage: the track's own width is max-content (it has to be, so it can hold
-   two full copies back to back and still be measurable for the -50% loop), so a percentage flex-basis has
-   nothing stable to resolve against — the child and the container would each be sizing off the other, which
-   is exactly the circular case that made every card blow out to its full max-content width (~15,000px) instead
-   of a normal card width. vw sizes each card off the viewport instead, sidestepping that circularity entirely. */
-/* Targets .tcard itself (a descendant selector), not ">*" (direct children only) — the second, duplicated set
-   of cards sits one level deeper, inside a display:contents wrapper (so it still lays out as a flat run of flex
-   items, but it's still a real element in the DOM tree, which is what ">*" cares about). ">*" only ever matched
-   the first set and the wrapper div itself, leaving the duplicated cards with no flex-basis at all — each one
-   defaulted to its own unconstrained content width instead, which is what made the track balloon out again. */
-.tcarousel-track .tcard{flex:0 0 82vw;min-width:0}
+/* Sized in vw, not a flex-basis percentage: the track's own width is max-content (so the row never wraps), and a
+   percentage flex-basis would have nothing stable to resolve against in that case — the child and the container
+   would each be sizing off the other. vw sizes each card off the viewport instead, sidestepping that entirely. */
+.tcarousel-track .tcard{flex:0 0 82vw;min-width:0;scroll-snap-align:start}
 @media(min-width:700px){.tcarousel-track .tcard{flex:0 0 55vw}}
 @media(min-width:1024px){.tcarousel-track{gap:24px}.tcarousel-track .tcard{flex:0 0 400px}}
 .tcard .sample{align-self:flex-start}
